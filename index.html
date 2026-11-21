@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1E6B57">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HACCP">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icona.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icona-180.png">
+<title>Quaderno HACCP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app a una colonna per telefono, barra schede in basso, schede "cartellino" per lotti e produzioni */
+:root{
+  --bg:#F5F6F3; --surface:#FFFFFF; --fg:#1C2320; --muted:#5E6A64; --line:#DCE1DC;
+  --accent:#1E6B57; --accent-ink:#FFFFFF; --accent-soft:#E2EFEA;
+  --warn:#9A5B00; --warn-soft:#FBEFD9; --bad:#A3302A; --bad-soft:#F7E1DF;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121715; --surface:#1A211E; --fg:#E7ECE9; --muted:#9AA8A1; --line:#2C3632;
+  --accent:#5FC0A3; --accent-ink:#0C1A15; --accent-soft:#1D3530;
+  --warn:#F0B45A; --warn-soft:#3A2C14; --bad:#F08A80; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121715; --surface:#1A211E; --fg:#E7ECE9; --muted:#9AA8A1; --line:#2C3632;
+  --accent:#5FC0A3; --accent-ink:#0C1A15; --accent-soft:#1D3530;
+  --warn:#F0B45A; --warn-soft:#3A2C14; --bad:#F08A80; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.45}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 110px;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:800;font-size:28px;margin:0;letter-spacing:-.01em}
+h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0;text-wrap:balance}
+h3{font-size:16px;margin:0}
+.sub{color:var(--muted);font-size:14px}
+.status{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.status.ok{color:var(--accent)} .status.off{color:var(--warn)}
+section.view{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.row{display:flex;gap:12px;align-items:center;min-width:0}
+.row > .grow{flex:1;min-width:0}
+.list{display:flex;flex-direction:column;gap:10px}
+.thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;background:var(--accent-soft);flex:none;display:grid;place-items:center;color:var(--muted);font-size:11px;text-align:center}
+.thumb.big{width:100%;height:auto;max-height:260px;aspect-ratio:4/3;max-width:100%}
+.code{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--fg);border:1px solid transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.ex{background:transparent;border-color:var(--line);color:var(--muted)}
+button,.btn{font:inherit;font-weight:700;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:11px 14px;cursor:pointer;min-height:44px}
+button.primary,.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.small{min-height:34px;padding:6px 10px;font-size:13px}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,label.toggle:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;min-height:44px;width:100%}
+textarea{min-height:110px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+label.toggle{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:6px 10px;border-radius:99px;border:1px solid var(--line);cursor:pointer;user-select:none}
+label.toggle input{width:auto;min-height:0;margin:0}
+label.toggle:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.photo-pick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;cursor:pointer;color:var(--muted)}
+.photo-pick strong{color:var(--fg)}
+.photo-pick input{display:none}
+.linkrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px;align-items:center;padding-block:8px;border-top:1px solid var(--line)}
+.linkrow:first-child{border-top:0}
+.empty{color:var(--muted);text-align:center;padding:18px 8px}
+.note{font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs button{border:0;border-radius:0;background:transparent;color:var(--muted);font-size:10.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;min-height:60px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="true"]{color:var(--accent)}
+.tiles{display:grid;grid-template-columns:1fr;gap:10px}
+.tile{display:flex;align-items:center;gap:14px;text-align:left;padding:16px;min-height:76px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.tile.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tile svg{width:34px;height:34px;flex:none}
+.tile b{display:block;font-family:var(--f-display);font-size:19px;font-weight:600}
+.tile span{font-weight:400;font-size:14px;opacity:.85}
+.guide ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+button.primary{min-height:54px;font-size:17px}
+.alert{border-left:4px solid var(--warn);}
+.label-prev{background:#fff;color:#111;border:1px solid var(--line);border-radius:6px;padding:12px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.35;display:flex;flex-direction:column;gap:6px;max-width:380px}
+.label-prev .lh{display:flex;gap:10px;align-items:center}
+.label-prev .lh img{max-height:44px;max-width:90px;object-fit:contain}
+.label-prev .ln{font-size:16px;font-weight:700}
+.label-prev .lsm{font-size:10px;color:#333}
+.label-prev b{font-weight:800;text-transform:uppercase}
+.regtabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.regtabs button{white-space:nowrap;min-height:40px;font-size:14px}
+.regtabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.steps{display:flex;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.steps b{color:var(--fg)}
+.pick2{display:grid;grid-template-columns:1fr;gap:10px}
+.pick-btn{display:flex;align-items:center;gap:14px;padding:16px;min-height:76px;border-radius:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.pick-btn.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pick-btn input{display:none}
+.pick-btn svg{width:32px;height:32px;flex:none}
+.pick-btn b{display:block;font-family:var(--f-display);font-size:18px;font-weight:600}
+.pick-btn small{font-size:14px;opacity:.85}
+.pick-btn:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.i-status{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:var(--accent-soft)}
+.i-status .grow{flex:1;min-width:0}
+.i-status strong{overflow-wrap:anywhere}
+.i-prev{width:64px;height:84px;object-fit:cover;object-position:top;border-radius:6px;border:1px solid var(--line);background:#fff;flex:none}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:30%;background:var(--accent);border-radius:99px}
+@media (prefers-reduced-motion:no-preference){.bar i{animation:slide 1.4s ease-in-out infinite}@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}}
+.chip.dup{background:var(--warn-soft);color:var(--warn)}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .15s}}
+
+#accesso{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:16px}
+#accesso form{width:100%;max-width:380px}
+#accesso label{display:flex;flex-direction:column;gap:4px;font-weight:700}
+body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Quaderno HACCP</h1>
+      <div class="sub">Pasticceria, panetteria, bar e caffetteria</div>
+    </div>
+    <span><span id="status" class="status">Collegamento…</span> <button class="small" type="button" onclick="esciHaccp()">Esci</button></span>
+  </header>
+
+  <!-- OGGI -->
+  <section class="view" id="v-home">
+    <div class="card guide" id="guide" hidden>
+      <h2>Come si usa, in 3 passi</h2>
+      <ol>
+        <li><b>Ricette</b>: scrivi una volta sola ogni prodotto con i suoi ingredienti.</li>
+        <li><b>Merce</b>: quando arriva la merce carica la fattura PDF (o fotografala). L'app legge lotti e scadenze; se manca la scadenza, fotografala sulla confezione.</li>
+        <li><b>Produci</b>: scegli la ricetta e fotografa il prodotto. I lotti si collegano da soli.</li>
+      </ol>
+      <div class="note">I dati con l'etichetta "esempio" servono solo a farti vedere come appare. Puoi eliminarli quando vuoi.</div>
+      <button class="primary" id="guide-ok">Ho capito</button>
+    </div>
+    <div class="tiles">
+      <button class="tile main" data-go="v-prod"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18h16M6 18c0-5 2.7-9 6-9s6 4 6 9"/><path d="M12 9V5"/></svg><div><b>Ho prodotto</b><span>Foto del prodotto, i lotti si collegano da soli</span></div></button>
+      <button class="tile" data-go="v-merci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13v10H3zM16 10h3l2 3v4h-5"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg><div><b>È arrivata merce</b><span>Carica la fattura PDF o fotografala</span></div></button>
+      <button class="tile" data-go="v-lots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-3h5L16 7"/></svg><div><b>Ho aperto una confezione</b><span>Foto dell'etichetta senza fattura</span></div></button>
+    </div>
+    <div id="h-alerts" class="list"></div>
+    <div class="card">
+      <h2>Cerca un lotto</h2>
+      <input id="t-q" class="code" placeholder="Scrivi il codice del lotto" autocomplete="off">
+      <div class="note">In caso di richiamo, scrivi il lotto di un ingrediente e vedi in quali prodotti è finito.</div>
+    </div>
+    <div class="list" id="t-res"></div>
+    <h2>Ultime produzioni</h2>
+    <div class="list" id="t-list"></div>
+  </section>
+
+  <!-- PRODUZIONE -->
+  <section class="view" id="v-prod" hidden>
+    <div class="steps"><span><b>1</b> Ricetta</span><span>→</span><span><b>2</b> Foto del prodotto</span><span>→</span><span><b>3</b> Lotti collegati da soli</span></div>
+    <div class="card">
+      <h2>Ho prodotto</h2>
+      <label class="f">Ricetta
+        <select id="p-recipe"></select>
+      </label>
+      <div class="grid2">
+        <label class="f">Quantità prodotta
+          <input id="p-qty" inputmode="numeric" placeholder="es. 60 pezzi">
+        </label>
+        <label class="f">Data
+          <input id="p-date" type="date">
+        </label>
+      </div>
+      <label class="photo-pick" id="p-pick">
+        <input id="p-photo" type="file" accept="image/*" capture="environment">
+        <img id="p-preview" class="thumb big" alt="Foto del prodotto" hidden>
+        <strong id="p-pick-label">Fotografa il prodotto finito</strong>
+        <span class="note">Si apre la fotocamera del telefono</span>
+      </label>
+      <div>
+        <h3>Lotti collegati</h3>
+        <div class="note">Per ogni ingrediente l'app sceglie l'ultimo lotto fotografato ancora in uso. Puoi cambiarlo.</div>
+      </div>
+      <div id="p-links"></div>
+      <button class="primary" id="p-save">Registra produzione</button>
+    </div>
+  </section>
+
+  <!-- MERCI / FATTURE -->
+  <section class="view" id="v-merci" hidden>
+    <div class="card">
+      <h2>È arrivata merce</h2>
+      <div class="note">Carica la fattura: l'app legge da sola fornitore, prodotti, quantità, lotti e scadenze. Tu controlli e salvi.</div>
+      <div class="pick2" id="i-pick">
+        <label class="pick-btn main">
+          <input id="i-file" type="file" accept="application/pdf,.pdf,.xml,text/xml,application/xml,image/*">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 14h6M9 18h4"/></svg>
+          <span><b>Carica la fattura PDF</b><small>Da email, WhatsApp o File del telefono</small></span>
+        </label>
+        <label class="pick-btn">
+          <input id="i-cam" type="file" accept="image/*" capture="environment">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-3h5L16 7"/></svg>
+          <span><b>Fotografa la fattura di carta</b><small>Si apre la fotocamera</small></span>
+        </label>
+      </div>
+      <div class="i-status" id="i-status" hidden>
+        <img id="i-prev" class="i-prev" alt="Anteprima della fattura" hidden>
+        <div class="grow"><strong id="i-pick-label"></strong><div class="note" id="i-note"></div>
+          <div class="bar" id="i-bar" hidden><i></i></div></div>
+      </div>
+      <div id="i-form" hidden>
+        <div class="grid2">
+          <label class="f">Fornitore<input id="i-sup" list="sup-list"></label>
+          <label class="f">Numero fattura<input id="i-num" class="code"></label>
+        </div>
+        <label class="f">Data fattura<input id="i-date" type="date"></label>
+        <div id="i-dup"></div>
+        <h3>Prodotti in fattura</h3>
+        <div class="note">Controlla le righe. Se manca lotto o scadenza, fotografa solo quel punto della confezione.</div>
+        <div class="list" id="i-lines"></div>
+        <button class="small" id="i-addline">Aggiungi riga</button>
+        <div class="row"><button class="primary grow" id="i-save">Salva fattura e lotti</button><button id="i-cancel">Annulla</button></div>
+      </div>
+    </div>
+    <datalist id="sup-list"></datalist>
+    <h2>Fornitori</h2>
+    <div class="list" id="s-list"></div>
+  </section>
+
+  <!-- LOTTI -->
+  <section class="view" id="v-lots" hidden>
+    <div class="card">
+      <h2>Ho aperto una confezione</h2>
+      <div class="note">Usa questa schermata per la merce senza fattura. Se hai la fattura, usa Merce.</div>
+      <label class="photo-pick">
+        <input id="l-photo" type="file" accept="image/*" capture="environment">
+        <img id="l-preview" class="thumb big" alt="Foto dell'etichetta" hidden>
+        <strong id="l-pick-label">Scatta la foto dell'etichetta o della confezione</strong>
+        <span class="note" id="l-ocr-note">Lotto e scadenza vengono letti dalla foto, se possibile</span>
+      </label>
+      <label class="f">Ingrediente
+        <input id="l-ing" list="ing-list" placeholder="es. farina 00">
+        <datalist id="ing-list"></datalist>
+      </label>
+      <div class="grid2">
+        <label class="f">Codice lotto
+          <input id="l-code" class="code" placeholder="es. L24-118">
+        </label>
+        <label class="f">Scadenza / TMC
+          <input id="l-exp" type="date">
+        </label>
+      </div>
+      <label class="f">Fornitore
+        <input id="l-sup" placeholder="es. Molino Rossi">
+      </label>
+      <button class="primary" id="l-save">Salva lotto</button>
+    </div>
+    <h2>Lotti in uso</h2>
+    <div class="list" id="l-list"></div>
+  </section>
+
+  <!-- RICETTE -->
+  <section class="view" id="v-rec" hidden>
+    <details class="card" id="shop-card">
+      <summary><strong>Dati della pasticceria per le etichette</strong></summary>
+      <label class="photo-pick">
+        <input id="sh-logo" type="file" accept="image/png,image/jpeg">
+        <img id="sh-logo-prev" class="thumb" style="width:auto;height:64px;object-fit:contain;background:transparent" alt="Logo" hidden>
+        <strong id="sh-logo-label">Carica il logo</strong>
+      </label>
+      <label class="f">Nome dell'attività<input id="sh-name" placeholder="es. Pasticceria Rosa"></label>
+      <label class="f">Indirizzo del laboratorio<input id="sh-addr" placeholder="Via, numero, CAP, città"></label>
+      <label class="f">Partita IVA (facoltativa)<input id="sh-vat"></label>
+      <label class="f">Formato etichetta più usato
+        <select id="sh-size"><option value="40x30">Piccola 40 × 30 mm</option>
+          <option value="58x40">Media 58 × 40 mm</option>
+          <option value="62x100">Grande 62 × 100 mm (rotolo Brother DK)</option>
+          <option value="100x70">Grande orizzontale 100 × 70 mm</option>
+          <option value="a4-3x8">Foglio A4 adesivo, 24 etichette 70 × 37 mm</option>
+          <option value="a4-2x4">Foglio A4 adesivo, 8 etichette 105 × 74 mm</option></select>
+      </label>
+      <div class="note">Ogni ricetta può avere un formato diverso: lo scegli nella ricetta.</div>
+      <button class="primary" id="sh-save">Salva dati</button>
+    </details>
+    <div class="card">
+      <h2 id="r-title">Nuova ricetta</h2>
+      <label class="f">Nome del prodotto
+        <input id="r-name" placeholder="es. Cornetto alla crema">
+      </label>
+      <label class="f">Ingredienti, uno per riga
+        <textarea id="r-ings" placeholder="farina 00&#10;burro&#10;uova&#10;zucchero"></textarea>
+      </label>
+      <div class="note">Scrivi gli ingredienti dal più pesante al più leggero: in etichetta vanno in quest'ordine.</div>
+      <div class="grid2">
+        <label class="f">Peso netto<input id="r-weight" placeholder="es. 500 g"></label>
+        <label class="f">Giorni di durata<input id="r-days" inputmode="numeric" placeholder="es. 3"></label>
+      </div>
+      <label class="f">Tipo di data
+        <select id="r-dtype"><option value="entro">Da consumarsi entro (deperibili)</option><option value="pref">Da consumarsi preferibilmente entro</option></select>
+      </label>
+      <label class="f">Conservazione<input id="r-store" placeholder="es. Conservare in frigorifero a +4 °C"></label>
+      <label class="f">Formato etichetta di questo prodotto
+        <select id="r-size"><option value="">Come il formato più usato</option><option value="40x30">Piccola 40 × 30 mm</option>
+          <option value="58x40">Media 58 × 40 mm</option>
+          <option value="62x100">Grande 62 × 100 mm (rotolo Brother DK)</option>
+          <option value="100x70">Grande orizzontale 100 × 70 mm</option>
+          <option value="a4-3x8">Foglio A4 adesivo, 24 etichette 70 × 37 mm</option>
+          <option value="a4-2x4">Foglio A4 adesivo, 8 etichette 105 × 74 mm</option>
+          <option value="custom">Misura personalizzata</option></select>
+      </label>
+      <div class="grid2" id="r-custom" hidden>
+        <label class="f">Larghezza mm<input id="r-cw" inputmode="decimal"></label>
+        <label class="f">Altezza mm<input id="r-ch" inputmode="decimal"></label>
+      </div>
+      <div class="f">Allergeni (Reg. UE 1169/2011)</div>
+      <div class="chips" id="r-all"></div>
+      <div class="row">
+        <button class="primary grow" id="r-save">Salva ricetta</button>
+        <button id="r-cancel" hidden>Annulla</button>
+      </div>
+    </div>
+    <h2>Le tue ricette</h2>
+    <div class="list" id="r-list"></div>
+  </section>
+
+  <!-- REGISTRI -->
+  <section class="view" id="v-reg" hidden>
+    <h2>Registri di autocontrollo</h2>
+    <div class="regtabs" id="g-tabs"></div>
+    <div class="card" id="g-form"></div>
+    <div class="list" id="g-list"></div>
+    <details class="card" id="g-dev">
+      <summary><strong>Frigoriferi e attrezzature</strong></summary>
+      <div class="note">Una riga per attrezzatura: nome; temperatura minima; massima. Esempio: Frigo pasticceria; 0; 4</div>
+      <textarea id="g-devs"></textarea>
+      <button id="g-devs-save">Salva attrezzature</button>
+    </details>
+    <div class="card">
+      <h2>Fascicolo per controllo ASL</h2>
+      <div class="note">Un unico PDF con tutti i registri del periodo: temperature, pulizie, non conformità, formazione, disinfestazione, ispezioni, fatture, lotti e produzioni.</div>
+      <div class="grid2">
+        <label class="f">Dal<input id="x-from" type="date"></label>
+        <label class="f">Al<input id="x-to" type="date"></label>
+      </div>
+      <button class="primary" id="x-pdf">Scarica il fascicolo PDF</button>
+    </div>
+    <div class="card">
+      <h2>Cartello allergeni per il banco</h2>
+      <div class="note">Obbligatorio per bar e pasticceria: elenco di tutti i prodotti con i loro allergeni, da tenere esposto o a disposizione dei clienti. Si crea dalle ricette.</div>
+      <button id="x-all">Scarica il cartello allergeni PDF</button>
+    </div>
+  </section>
+
+  <!-- ETICHETTA -->
+  <section class="view" id="v-label" hidden>
+    <div class="row"><button class="small" id="lb-back">← Indietro</button><h2 class="grow">Etichetta</h2></div>
+    <div class="card">
+      <div id="lb-prev"></div>
+      <div class="grid2">
+        <label class="f">Peso netto<input id="lb-weight"></label>
+        <label class="f">Scadenza<input id="lb-exp" type="date"></label>
+      </div>
+      <label class="f">Formato
+        <select id="lb-size"><option value="40x30">Piccola 40 × 30 mm</option>
+          <option value="58x40">Media 58 × 40 mm</option>
+          <option value="62x100">Grande 62 × 100 mm (rotolo Brother DK)</option>
+          <option value="100x70">Grande orizzontale 100 × 70 mm</option>
+          <option value="a4-3x8">Foglio A4 adesivo, 24 etichette 70 × 37 mm</option>
+          <option value="a4-2x4">Foglio A4 adesivo, 8 etichette 105 × 74 mm</option>
+          <option value="custom">Misura personalizzata</option></select>
+      </label>
+      <div class="grid2" id="lb-custom" hidden>
+        <label class="f">Larghezza mm<input id="lb-cw" inputmode="decimal"></label>
+        <label class="f">Altezza mm<input id="lb-ch" inputmode="decimal"></label>
+      </div>
+      <label class="f">Quante etichette<input id="lb-n" inputmode="numeric" value="1"></label>
+      <div class="note">Il testo si rimpicciolisce da solo per stare nell'etichetta. Se diventa troppo piccolo, scegli un formato più grande.</div>
+      <button class="primary" id="lb-pdf">Scarica PDF da stampare</button>
+      <div class="note" id="lb-note">Controlla sempre ingredienti e allergeni prima di stampare.</div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sezioni">
+  <button data-v="v-home" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9H3z"/><path d="M10 20v-6h4v6"/></svg>Oggi</button>
+  <button data-v="v-prod"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18h16M6 18c0-5 2.7-9 6-9s6 4 6 9"/><path d="M12 9V5"/></svg>Produci</button>
+  <button data-v="v-merci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13v10H3zM16 10h3l2 3v4h-5"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg>Merce</button>
+  <button data-v="v-lots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-3h5L16 7"/></svg>Lotti</button>
+  <button data-v="v-reg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h4v4M10 14l8-10M5 6h5M5 12h3M5 18h14"/></svg>Registri</button>
+  <button data-v="v-rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h10l3 3v15H6z"/><path d="M9 10h7M9 14h7M9 18h4"/></svg>Ricette</button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.3/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="collegamento.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const ALLERGENI=["glutine","crostacei","uova","pesce","arachidi","soia","latte","frutta a guscio","sedano","senape","sesamo","solfiti","lupini","molluschi"];
+const S={recipes:[],lots:[],batches:[],invoices:[],logs:[]};
+let db=null, assets=null, sample=null, downloads=null, editingRecipe=null, shop={};
+const $=id=>document.getElementById(id);
+const norm=s=>(s||"").trim().toLowerCase().replace(/\s+/g," ");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const fmtDate=d=>d?new Date(d+"T12:00:00").toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
+function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
+function daysTo(d){if(!d)return null;return Math.round((new Date(d+"T12:00:00")-new Date(today()+"T12:00:00"))/864e5)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+/* ---------- archivio ---------- */
+async function put(col,id,data){
+  if(db){await db.collection(col).doc(id).set(data)}
+  else{const arr=S[col];const i=arr.findIndex(x=>x.id===id);const row={...data,id};if(i>=0)arr[i]=row;else arr.push(row);renderAll()}
+}
+async function del(col,id){
+  if(db){await db.collection(col).doc(id).delete()}
+  else{S[col]=S[col].filter(x=>x.id!==id);renderAll()}
+}
+function listen(col){
+  db.collection(col).onSnapshot(snap=>{S[col]=snap.docs.map(d=>({...d.data(),id:d.id}));renderAll()},
+    e=>{setStatus("Errore archivio: "+(e.message||e.code),"off")})
+}
+function setStatus(t,c){const s=$("status");s.textContent=t;s.className="status "+(c||"")}
+
+/* ---------- foto ---------- */
+async function shrink(file,max=1400){
+  const img=await createImageBitmap(file).catch(()=>null);
+  if(!img)return file;
+  const k=Math.min(1,max/Math.max(img.width,img.height));
+  const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+  c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+  return await new Promise(r=>c.toBlob(b=>r(b||file),"image/jpeg",.82));
+}
+async function storePhoto(blob){
+  if(!blob)return {};
+  if(!assets)return {photoUrl:URL.createObjectURL(blob)};
+  const a=await assets.upload(blob);return {photoId:a.id,photoUrl:a.url};
+}
+function bindPreview(inputId,imgId,labelId,txt){
+  $(inputId).addEventListener("change",()=>{const f=$(inputId).files[0];const im=$(imgId);
+    if(f){im.src=URL.createObjectURL(f);im.hidden=false;$(labelId).textContent=txt}});
+}
+
+/* ---------- ricette ---------- */
+function allIngredients(){const set=new Set();S.recipes.forEach(r=>(r.ingredients||[]).forEach(i=>set.add(norm(i))));S.lots.forEach(l=>set.add(norm(l.ingredient)));return [...set].filter(Boolean).sort()}
+function renderAllergenChips(sel=[]){
+  $("r-all").innerHTML=ALLERGENI.map((a,i)=>`<label class="toggle"><input type="checkbox" id="al-${i}" value="${a}" ${sel.includes(a)?"checked":""}>${a}</label>`).join("");
+}
+function resetRecipeForm(){editingRecipe=null;$("r-name").value="";$("r-ings").value="";["r-weight","r-days","r-store"].forEach(i=>$(i).value="");$("r-dtype").value="entro";$("r-size").value="";$("r-cw").value="";$("r-ch").value="";$("r-custom").hidden=true;renderAllergenChips();$("r-title").textContent="Nuova ricetta";$("r-cancel").hidden=true}
+$("r-save").onclick=async()=>{
+  const name=$("r-name").value.trim();const ings=$("r-ings").value.split("\n").map(norm).filter(Boolean);
+  if(!name||!ings.length){toast("Scrivi il nome e almeno un ingrediente");return}
+  const allergens=[...$("r-all").querySelectorAll("input:checked")].map(i=>i.value);
+  const id=editingRecipe||uid();const prev=S.recipes.find(r=>r.id===id)||{};
+  try{await put("recipes",id,{name,ingredients:ings,allergens,weight:$("r-weight").value.trim(),shelfDays:parseInt($("r-days").value)||0,dateType:$("r-dtype").value,storage:$("r-store").value.trim(),labelSize:$("r-size").value,labelW:parseFloat($("r-cw").value)||0,labelH:parseFloat($("r-ch").value)||0,createdAt:prev.createdAt||Date.now()});toast("Ricetta salvata");resetRecipeForm()}
+  catch(e){toast("Non salvata: "+(e.message||e.code))}
+};
+$("r-cancel").onclick=resetRecipeForm;
+$("r-size").addEventListener("change",()=>$("r-custom").hidden=$("r-size").value!=="custom");
+$("r-ings").addEventListener("change",()=>{const found=new Set();$("r-ings").value.split("\n").forEach(i=>allergenOf(i).forEach(a=>found.add(a)));
+  $("r-all").querySelectorAll("input").forEach(c=>{if(found.has(c.value))c.checked=true})});
+function renderRecipes(){
+  const el=$("r-list");
+  if(!S.recipes.length){el.innerHTML=`<div class="card empty">Nessuna ricetta. Inserisci la prima qui sopra: basta il nome e gli ingredienti, una volta sola.</div>`;return}
+  el.innerHTML=[...S.recipes].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<div class="card">
+    <div class="row"><h3 class="grow">${esc(r.name)}</h3>${r.example?'<span class="chip ex">esempio</span>':""}</div>
+    <div class="sub">${(r.ingredients||[]).map(esc).join(", ")}</div>
+    <div class="chips">${(r.allergens||[]).map(a=>`<span class="chip warn">${esc(a)}</span>`).join("")||'<span class="note">Nessun allergene indicato</span>'}</div>
+    <div class="row"><button class="small" data-edit="${r.id}">Modifica</button><button class="small" data-delrec="${r.id}">Elimina</button></div>
+  </div>`).join("");
+}
+$("r-list").addEventListener("click",async e=>{
+  const ed=e.target.closest("[data-edit]"),dl=e.target.closest("[data-delrec]");
+  if(ed){const r=S.recipes.find(x=>x.id===ed.dataset.edit);editingRecipe=r.id;$("r-name").value=r.name;$("r-ings").value=(r.ingredients||[]).join("\n");renderAllergenChips(r.allergens||[]);$("r-weight").value=r.weight||"";$("r-days").value=r.shelfDays||"";$("r-dtype").value=r.dateType||"entro";$("r-store").value=r.storage||"";$("r-size").value=r.labelSize||"";$("r-cw").value=r.labelW||"";$("r-ch").value=r.labelH||"";$("r-custom").hidden=$("r-size").value!=="custom";$("r-title").textContent="Modifica ricetta";$("r-cancel").hidden=false;window.scrollTo({top:0,behavior:"smooth"})}
+  if(dl){if(dl.dataset.sure){await del("recipes",dl.dataset.delrec);toast("Ricetta eliminata")}else{dl.dataset.sure="1";dl.textContent="Tocca ancora per eliminare"}}
+});
+
+/* ---------- lotti ---------- */
+bindPreview("l-photo","l-preview","l-pick-label","Foto pronta · tocca per rifarla");
+$("l-photo").addEventListener("change",async()=>{
+  const f=$("l-photo").files[0];if(!f||!sample)return;
+  const note=$("l-ocr-note");note.textContent="Leggo l'etichetta…";
+  try{
+    const small=await shrink(f,1000);
+    const r=await sample.json(`Sei un assistente HACCP di un panificio. Dalla foto di un'etichetta alimentare estrai i dati. Rispondi solo con JSON: {"ingrediente": nome generico in italiano minuscolo (es. "farina 00","burro","uova"), "lotto": codice lotto esatto come stampato o "", "scadenza": data di scadenza o TMC in formato AAAA-MM-GG o "", "fornitore": marca o produttore o ""}. Ingredienti già conosciuti: ${allIngredients().join(", ")||"nessuno"}. Se l'ingrediente corrisponde a uno di questi, usa lo stesso nome.`,{images:[small],modelTier:"quick"});
+    if(r.ingrediente&&!$("l-ing").value)$("l-ing").value=norm(r.ingrediente);
+    if(r.lotto&&!$("l-code").value)$("l-code").value=r.lotto;
+    if(r.scadenza&&/^\d{4}-\d{2}-\d{2}$/.test(r.scadenza)&&!$("l-exp").value)$("l-exp").value=r.scadenza;
+    if(r.fornitore&&!$("l-sup").value)$("l-sup").value=r.fornitore;
+    note.textContent="Dati letti dalla foto: controllali prima di salvare";
+  }catch(e){note.textContent=e.code==="not_granted"?"Lettura automatica non consentita: scrivi i dati a mano":"Non sono riuscito a leggere l'etichetta: scrivi i dati a mano"}
+});
+$("l-save").onclick=async()=>{
+  const ingredient=norm($("l-ing").value),code=$("l-code").value.trim();
+  if(!ingredient||!code){toast("Servono ingrediente e codice lotto");return}
+  const btn=$("l-save");btn.disabled=true;btn.textContent="Salvo…";
+  try{
+    const f=$("l-photo").files[0];const ph=f?await storePhoto(await shrink(f)):{};
+    await put("lots",uid(),{ingredient,code,expiry:$("l-exp").value||"",supplier:$("l-sup").value.trim(),status:"in uso",takenAt:Date.now(),...ph});
+    ["l-ing","l-code","l-exp","l-sup"].forEach(i=>$(i).value="");$("l-photo").value="";$("l-preview").hidden=true;$("l-pick-label").textContent="Scatta la foto dell'etichetta o della confezione";
+    toast("Lotto salvato");
+  }catch(e){toast("Non salvato: "+(e.message||e.code))}
+  btn.disabled=false;btn.textContent="Salva lotto";
+};
+function expChip(d){const n=daysTo(d);if(n===null)return"";if(n<0)return`<span class="chip bad">scaduto</span>`;if(n<=7)return`<span class="chip warn">scade tra ${n} gg</span>`;return""}
+function lotThumb(l){return l.photoUrl?`<img class="thumb" src="${esc(l.photoUrl)}" alt="">`:`<div class="thumb">senza foto</div>`}
+function renderLots(){
+  const el=$("l-list");const open=S.lots.filter(l=>l.status!=="finito").sort((a,b)=>b.takenAt-a.takenAt);
+  if(!open.length){el.innerHTML=`<div class="card empty">Nessun lotto in uso. Quando apri una confezione, fotografa l'etichetta qui sopra.</div>`;return}
+  el.innerHTML=open.map(l=>`<div class="card"><div class="row">${lotThumb(l)}
+    <div class="grow"><h3>${esc(l.ingredient)}</h3><div class="code">${esc(l.code)}</div>
+    <div class="sub">Scad. ${fmtDate(l.expiry)}${l.supplier?" · "+esc(l.supplier):""}${l.invoiceNo?" · Fatt. "+esc(l.invoiceNo):""}</div></div></div>
+    <div class="row"><div class="chips grow">${expChip(l.expiry)}${l.example?'<span class="chip ex">esempio</span>':""}<span class="chip">${l.invoiceId?"da fattura":"foto"} del ${new Date(l.takenAt).toLocaleDateString("it-IT")}</span></div>
+    <button class="small" data-finish="${l.id}">Finito</button></div></div>`).join("");
+  $("ing-list").innerHTML=allIngredients().map(i=>`<option value="${esc(i)}">`).join("");
+}
+$("l-list").addEventListener("click",async e=>{const b=e.target.closest("[data-finish]");if(!b)return;
+  const l=S.lots.find(x=>x.id===b.dataset.finish);const {id,...rest}=l;await put("lots",id,{...rest,status:"finito",finishedAt:Date.now()});toast("Lotto segnato come finito")});
+
+/* ---------- produzione ---------- */
+bindPreview("p-photo","p-preview","p-pick-label","Foto pronta · tocca per rifarla");
+$("p-date").value=today();
+function bestLot(ing){return S.lots.filter(l=>norm(l.ingredient)===norm(ing)&&l.status!=="finito").sort((a,b)=>b.takenAt-a.takenAt)[0]}
+function renderRecipeSelect(){
+  const sel=$("p-recipe");const cur=sel.value;
+  sel.innerHTML=S.recipes.length?[...S.recipes].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join(""):`<option value="">Prima inserisci una ricetta</option>`;
+  if(cur&&S.recipes.some(r=>r.id===cur))sel.value=cur;
+}
+const manual={};
+function renderLinks(){
+  const r=S.recipes.find(x=>x.id===$("p-recipe").value);const el=$("p-links");
+  if(!r){el.innerHTML=`<div class="empty">Nessuna ricetta scelta</div>`;return}
+  el.innerHTML=r.ingredients.map(ing=>{
+    const opts=S.lots.filter(l=>norm(l.ingredient)===norm(ing)&&l.status!=="finito").sort((a,b)=>b.takenAt-a.takenAt);
+    const chosen=manual[r.id+"|"+ing]??bestLot(ing)?.id??"";
+    const lot=opts.find(o=>o.id===chosen);
+    return `<div class="linkrow"><div><strong>${esc(ing)}</strong><div class="chips">${lot?expChip(lot.expiry):'<span class="chip bad">manca la foto del lotto</span>'}</div></div>
+      <select data-ing="${esc(ing)}" aria-label="Lotto di ${esc(ing)}">${opts.map(o=>`<option value="${o.id}" ${o.id===chosen?"selected":""}>${esc(o.code)} · scad. ${fmtDate(o.expiry)}</option>`).join("")}<option value="" ${!chosen?"selected":""}>— nessun lotto —</option></select></div>`}).join("");
+}
+$("p-recipe").addEventListener("change",renderLinks);
+$("p-links").addEventListener("change",e=>{const s=e.target.closest("select[data-ing]");if(s){manual[$("p-recipe").value+"|"+s.dataset.ing]=s.value;renderLinks()}});
+function productCode(r,date){
+  const pre=r.name.normalize("NFD").replace(/[^A-Za-z]/g,"").slice(0,3).toUpperCase()||"PRD";
+  const d=date.replaceAll("-","").slice(2);
+  const n=S.batches.filter(b=>b.date===date&&b.recipeId===r.id).length+1;
+  return `${pre}-${d}-${n}`;
+}
+$("p-save").onclick=async()=>{
+  const r=S.recipes.find(x=>x.id===$("p-recipe").value);if(!r){toast("Scegli una ricetta");return}
+  const date=$("p-date").value||today();
+  const lots=r.ingredients.map(ing=>{const id=manual[r.id+"|"+ing]??bestLot(ing)?.id;const l=S.lots.find(x=>x.id===id);
+    return {ingredient:ing,lotId:l?.id||"",lotCode:l?.code||"",expiry:l?.expiry||"",supplier:l?.supplier||""}});
+  const btn=$("p-save");btn.disabled=true;btn.textContent="Registro…";
+  try{
+    const f=$("p-photo").files[0];const ph=f?await storePhoto(await shrink(f)):{};
+    const code=productCode(r,date);
+    await put("batches",uid(),{recipeId:r.id,recipeName:r.name,allergens:r.allergens||[],code,date,qty:$("p-qty").value.trim(),lots,createdAt:Date.now(),...ph});
+    $("p-photo").value="";$("p-preview").hidden=true;$("p-qty").value="";$("p-pick-label").textContent="Fotografa il prodotto finito";
+    const miss=lots.filter(l=>!l.lotCode).length;
+    toast(`Registrato lotto ${code}`+(miss?` · ${miss} ingredienti senza lotto`:""));
+  }catch(e){toast("Non registrato: "+(e.message||e.code))}
+  btn.disabled=false;btn.textContent="Registra produzione";
+};
+
+/* ---------- tracciabilità ---------- */
+function batchCard(b,hl){
+  const thumb=b.photoUrl?`<img class="thumb" src="${esc(b.photoUrl)}" alt="">`:`<div class="thumb">senza foto</div>`;
+  return `<div class="card"><div class="row">${thumb}<div class="grow"><h3>${esc(b.recipeName)}</h3>
+    <div class="code">Lotto ${esc(b.code)}</div><div class="sub">${fmtDate(b.date)}${b.qty?" · "+esc(b.qty):""}</div></div>${b.example?'<span class="chip ex">esempio</span>':""}</div>
+    <div>${(b.lots||[]).map(l=>`<div class="linkrow"><span>${esc(l.ingredient)}</span><span class="code" ${hl&&norm(l.lotCode).includes(hl)?'style="color:var(--accent);font-weight:700"':""}>${l.lotCode?esc(l.lotCode):'<span class="chip bad">nessun lotto</span>'}</span></div>`).join("")}</div>
+    ${(b.allergens||[]).length?`<div class="chips">${b.allergens.map(a=>`<span class="chip warn">${esc(a)}</span>`).join("")}</div>`:""}
+    <button class="small" data-label="${b.id}">Etichetta</button></div>`;
+}
+function renderTrace(){
+  const q=norm($("t-q").value);const res=$("t-res");
+  if(q){const hits=S.batches.filter(b=>norm(b.code).includes(q)||(b.lots||[]).some(l=>norm(l.lotCode).includes(q))).sort((a,b)=>b.createdAt-a.createdAt);
+    res.innerHTML=hits.length?`<div class="note">${hits.length} produzion${hits.length===1?"e":"i"} trovat${hits.length===1?"a":"e"}</div>`+hits.map(b=>batchCard(b,q)).join(""):`<div class="card empty">Nessuna produzione con questo lotto</div>`}
+  else res.innerHTML="";
+  const recent=[...S.batches].sort((a,b)=>b.createdAt-a.createdAt).slice(0,15);
+  $("t-list").innerHTML=recent.length?recent.map(b=>batchCard(b)).join(""):`<div class="card empty">Ancora nessuna produzione registrata</div>`;
+}
+$("t-q").addEventListener("input",renderTrace);
+
+/* ---------- fatture e fornitori ---------- */
+let draft=null; // {lines:[{product,ingredient,qty,code,expiry}], file, fileName}
+const PROMPT_INV=`Sei un assistente HACCP di un panificio-pasticceria italiano. Leggi questa fattura o DDT di un fornitore ed estrai i dati. Rispondi solo con JSON:
+{"fornitore":"ragione sociale del fornitore (chi emette la fattura, non il cliente)","numero":"numero fattura","data":"AAAA-MM-GG o \"\"","righe":[{"prodotto":"descrizione come in fattura","ingrediente":"nome generico in italiano minuscolo, es. farina 00, burro, uova","quantita":"quantità con unità, es. 10 kg","lotto":"codice lotto se presente o \"\"","scadenza":"AAAA-MM-GG se presente o \"\""}]}
+Escludi righe che non sono alimenti (trasporto, imballi, sconti, cauzioni, contributi). Il lotto spesso è scritto nella descrizione o in una riga sotto il prodotto (es. "Lotto: L2345", "Lot. 24118", "L.0921"): assegnalo al prodotto giusto. La scadenza può essere indicata come "Scad.", "TMC", "da consumarsi entro". Se una data è scritta GG/MM/AAAA convertila in AAAA-MM-GG. Non inventare lotti o scadenze che non vedi. Ingredienti già usati nelle ricette: `;
+let pdfReady=null;
+function pdfLib(){
+  if(!window.pdfjsLib)return Promise.reject(new Error("Lettore PDF non caricato: controlla la connessione e riprova"));
+  if(!pdfReady){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";pdfReady=Promise.resolve(pdfjsLib)}
+  return pdfReady;
+}
+async function readPdf(file,onStep){
+  const lib=await pdfLib();
+  let pdf;
+  try{pdf=await lib.getDocument({data:await file.arrayBuffer(),isEvalSupported:false}).promise}
+  catch(e){throw new Error(e&&e.name==="PasswordException"?"Il PDF è protetto da password":"Il file non sembra un PDF valido")}
+  const n=Math.min(pdf.numPages,5);const images=[];let text="";
+  for(let i=1;i<=n;i++){
+    onStep&&onStep(`Leggo la pagina ${i} di ${pdf.numPages}…`);
+    const pg=await pdf.getPage(i);
+    // testo vero del PDF (fatture digitali): righe ordinate dall'alto in basso
+    try{const tc=await pg.getTextContent();const rows={};
+      tc.items.forEach(it=>{if(!it.str||!it.str.trim())return;const y=Math.round(it.transform[5]/3);(rows[y]=rows[y]||[]).push([it.transform[4],it.str])});
+      text+=`\n--- Pagina ${i} ---\n`+Object.keys(rows).map(Number).sort((a,b)=>b-a).map(y=>rows[y].sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join("  ")).join("\n")}catch{}
+    const base=pg.getViewport({scale:1});const k=Math.min(2,1600/Math.max(base.width,base.height));const vp=pg.getViewport({scale:k});
+    const c=document.createElement("canvas");c.width=Math.round(vp.width);c.height=Math.round(vp.height);
+    const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);
+    await pg.render({canvasContext:g,viewport:vp}).promise;
+    images.push(await new Promise(r=>c.toBlob(r,"image/jpeg",.85)));
+  }
+  return {text:text.trim().slice(0,40000),images,pages:pdf.numPages,read:n};
+}
+const isPdf=f=>/pdf/.test(f.type)||/\.pdf$/i.test(f.name||"");
+const isXml=f=>/\.xml$/i.test(f.name||"")||/xml/.test(f.type);
+async function readInvoice(file,onStep){
+  const known=allIngredients().join(", ")||"nessuno";
+  if(isXml(file)){
+    onStep&&onStep("Leggo la fattura elettronica…");
+    let txt=await file.text();
+    txt=txt.replace(/<Allegati>[\s\S]*?<\/Allegati>/gi,"").replace(/<Attachment>[\s\S]*?<\/Attachment>/gi,"").slice(0,60000);
+    onStep&&onStep("Estraggo prodotti, lotti e scadenze…");
+    return {data:await sample.json(PROMPT_INV+known+"\n\nFattura elettronica XML:\n"+txt,{modelTier:"default"})};
+  }
+  if(isPdf(file)){
+    const p=await readPdf(file,onStep);
+    onStep&&onStep("Estraggo prodotti, lotti e scadenze…");
+    const hasText=p.text.replace(/---.*---/g,"").trim().length>40;
+    const extra=hasText?`\n\nTesto estratto dal PDF (usalo per copiare esattamente codici lotto, numeri e date; le immagini delle pagine servono per capire a quale prodotto si riferiscono):\n${p.text}`:"\n\nIl PDF è una scansione: leggi tutto dalle immagini delle pagine.";
+    const data=await sample.json(PROMPT_INV+known+extra,{images:p.images,modelTier:"default"});
+    return {data,preview:p.images[0],pages:p.pages,read:p.read};
+  }
+  onStep&&onStep("Leggo la foto…");
+  const img=await shrink(file,1800);
+  onStep&&onStep("Estraggo prodotti, lotti e scadenze…");
+  return {data:await sample.json(PROMPT_INV+known,{images:[img],modelTier:"default"}),preview:img};
+}
+function blankLine(){return {product:"",ingredient:"",qty:"",code:"",expiry:""}}
+function setPrev(blob){const im=$("i-prev");if(blob){try{URL.revokeObjectURL(im.src)}catch{}im.src=URL.createObjectURL(blob);im.hidden=false}else im.hidden=true}
+function checkDup(){
+  const s=norm($("i-sup").value),n=norm($("i-num").value);const el=$("i-dup");
+  const d=s&&n&&S.invoices.find(v=>norm(v.supplier)===s&&norm(v.number)===n);
+  el.innerHTML=d?`<span class="chip dup">Questa fattura risulta già caricata il ${new Date(d.createdAt).toLocaleDateString("it-IT")}</span>`:"";
+}
+async function handleInvoiceFile(f){
+  if(!f)return;
+  if(!isPdf(f)&&!isXml(f)&&!/^image\//.test(f.type)){toast("Questo file non è una fattura PDF, XML o una foto");return}
+  draft={lines:[],file:f,fileName:f.name||"foto-fattura.jpg"};
+  $("i-pick").hidden=true;$("i-status").hidden=false;$("i-bar").hidden=false;
+  $("i-pick-label").textContent=isPdf(f)?(f.name||"Fattura PDF"):isXml(f)?(f.name||"Fattura elettronica"):"Foto della fattura";
+  setPrev(/^image\//.test(f.type)?f:null);
+  $("i-form").hidden=true;["i-sup","i-num"].forEach(i=>$(i).value="");$("i-date").value="";$("i-dup").innerHTML="";
+  const note=$("i-note");
+  if(!sample){note.textContent="Lettura automatica non disponibile qui: compila le righe a mano";$("i-bar").hidden=true;draft.lines=[blankLine()];$("i-form").hidden=false;renderDraft();return}
+  note.textContent="Apro la fattura…";
+  try{
+    const res=await readInvoice(f,t=>note.textContent=t);
+    if(!draft||draft.file!==f)return;
+    const r=res.data||{};
+    if(res.preview)setPrev(res.preview);
+    $("i-sup").value=r.fornitore||"";$("i-num").value=r.numero||"";
+    if(/^\d{4}-\d{2}-\d{2}$/.test(r.data||""))$("i-date").value=r.data;
+    draft.lines=(r.righe||[]).map(x=>({product:x.prodotto||"",ingredient:norm(x.ingrediente),qty:x.quantita||"",code:x.lotto||"",expiry:/^\d{4}-\d{2}-\d{2}$/.test(x.scadenza||"")?x.scadenza:""}));
+    if(!draft.lines.length)draft.lines=[blankLine()];
+    const miss=draft.lines.filter(l=>!l.code||!l.expiry).length;
+    note.textContent=`Lette ${draft.lines.length} righe`+(miss?` · ${miss} senza lotto o scadenza`:" · tutto completo")+(res.pages>res.read?` · lette le prime ${res.read} pagine su ${res.pages}`:"")+". Controlla e salva.";
+    checkDup();
+  }catch(e){
+    if(!draft||draft.file!==f)return;
+    note.textContent=e.code==="not_granted"?"Lettura automatica non consentita: compila le righe a mano":e.code==="rate_limited"?"Troppe letture di fila: aspetta un minuto e riprova, o compila a mano":"Non sono riuscito a leggere la fattura"+(e.message&&!e.code?` (${e.message})`:"")+": compila le righe a mano";
+    draft.lines=[blankLine()];
+  }
+  $("i-bar").hidden=true;$("i-form").hidden=false;renderDraft();
+}
+$("i-file").addEventListener("change",()=>handleInvoiceFile($("i-file").files[0]));
+$("i-cam").addEventListener("change",()=>handleInvoiceFile($("i-cam").files[0]));
+["i-sup","i-num"].forEach(i=>$(i).addEventListener("input",checkDup));
+function renderDraft(){
+  if(!draft)return;
+  $("i-lines").innerHTML=draft.lines.map((l,i)=>`<div class="card" data-i="${i}">
+    ${l.product?`<div class="sub">${esc(l.product)}</div>`:""}
+    <div class="grid2"><label class="f">Ingrediente<input data-k="ingredient" list="ing-list" value="${esc(l.ingredient)}"></label>
+    <label class="f">Quantità<input data-k="qty" value="${esc(l.qty)}"></label>
+    <label class="f">Lotto<input data-k="code" class="code" value="${esc(l.code)}"></label>
+    <label class="f">Scadenza<input data-k="expiry" type="date" value="${esc(l.expiry)}"></label></div>
+    <div class="row">${(!l.code||!l.expiry)?`<label class="btn small" style="display:inline-flex;align-items:center">Foto scadenza/lotto<input type="file" accept="image/*" capture="environment" data-snap="${i}" hidden></label>`:'<span class="chip">completa</span>'}
+    <span class="note grow" data-msg="${i}"></span><button class="small" data-rm="${i}">Togli</button></div></div>`).join("");
+}
+$("i-lines").addEventListener("input",e=>{const inp=e.target.closest("[data-k]");if(!inp)return;const i=+inp.closest("[data-i]").dataset.i;draft.lines[i][inp.dataset.k]=inp.value});
+$("i-lines").addEventListener("change",async e=>{
+  const inp=e.target.closest("[data-k]");if(inp){renderDraft();return}
+  const snap=e.target.closest("[data-snap]");if(!snap||!snap.files[0])return;
+  const i=+snap.dataset.snap;const l=draft.lines[i];const msg=$("i-lines").querySelector(`[data-msg="${i}"]`);
+  l.snap=snap.files[0];
+  if(!sample){msg.textContent="Foto salvata, scrivi i dati a mano";return}
+  msg.textContent="Leggo…";
+  try{const r=await sample.json(`Foto di una confezione alimentare (${l.ingredient||l.product}). Leggi il codice lotto e la data di scadenza o TMC. Rispondi solo con JSON {"lotto":"" ,"scadenza":"AAAA-MM-GG o \"\""}.`,{images:[await shrink(l.snap,1000)],modelTier:"quick"});
+    if(r.lotto&&!l.code)l.code=r.lotto;if(/^\d{4}-\d{2}-\d{2}$/.test(r.scadenza||"")&&!l.expiry)l.expiry=r.scadenza;renderDraft()}
+  catch{msg.textContent="Non letto: scrivi i dati a mano"}
+});
+$("i-lines").addEventListener("click",e=>{const b=e.target.closest("[data-rm]");if(b){draft.lines.splice(+b.dataset.rm,1);renderDraft()}});
+$("i-addline").onclick=()=>{draft.lines.push(blankLine());renderDraft()};
+$("i-cancel").onclick=()=>{draft=null;$("i-form").hidden=true;$("i-file").value="";$("i-cam").value="";$("i-status").hidden=true;$("i-pick").hidden=false;setPrev(null);$("i-dup").innerHTML=""};
+$("i-save").onclick=async()=>{
+  const supplier=$("i-sup").value.trim();const lines=draft.lines.filter(l=>norm(l.ingredient));
+  if(!supplier||!lines.length){toast("Servono il fornitore e almeno un prodotto");return}
+  const btn=$("i-save");btn.disabled=true;btn.textContent="Salvo…";
+  try{
+    let fileRef={};
+    if(assets){try{const f=draft.file;const blob=/\.xml$/i.test(f.name)?new Blob([await f.text()],{type:"text/plain"}):(/^image\//.test(f.type)?await shrink(f,1800):f);const a=await assets.upload(blob);fileRef={fileId:a.id,fileUrl:a.url}}catch{}}
+    const invId=uid();const number=$("i-num").value.trim();const now=Date.now();
+    await put("invoices",invId,{supplier,number,date:$("i-date").value||"",fileName:draft.fileName||"",...fileRef,createdAt:now,
+      lines:lines.map(l=>({product:l.product,ingredient:norm(l.ingredient),qty:l.qty,code:l.code,expiry:l.expiry}))});
+    for(const [k,l] of lines.entries()){
+      const ph=l.snap?await storePhoto(await shrink(l.snap)):{};
+      await put("lots",uid(),{ingredient:norm(l.ingredient),code:l.code||"(senza lotto)",expiry:l.expiry||"",supplier,product:l.product,qty:l.qty,invoiceId:invId,invoiceNo:number,status:"in uso",takenAt:now+k,...ph});
+    }
+    toast(`Fattura salvata · ${lines.length} lotti aggiunti`);$("i-cancel").onclick();
+  }catch(e){toast("Non salvata: "+(e.message||e.code))}
+  btn.disabled=false;btn.textContent="Salva fattura e lotti";
+};
+function renderInvoices(){
+  const by={};S.invoices.forEach(v=>{(by[v.supplier]=by[v.supplier]||[]).push(v)});
+  S.lots.forEach(l=>{if(l.supplier&&!by[l.supplier])by[l.supplier]=[]});
+  const names=Object.keys(by).sort((a,b)=>a.localeCompare(b));
+  $("sup-list").innerHTML=names.map(n=>`<option value="${esc(n)}">`).join("");
+  $("s-list").innerHTML=names.length?names.map(n=>{const inv=by[n].sort((a,b)=>b.createdAt-a.createdAt);const nl=S.lots.filter(l=>l.supplier===n).length;
+    return `<div class="card"><div class="row"><h3 class="grow">${esc(n)}</h3><span class="chip">${inv.length} fattur${inv.length===1?"a":"e"} · ${nl} lott${nl===1?"o":"i"}</span></div>
+    ${inv.slice(0,5).map(v=>`<div class="linkrow"><span class="code">N. ${esc(v.number||"—")} · ${fmtDate(v.date)}</span><span class="sub">${(v.lines||[]).map(x=>esc(x.ingredient)).join(", ")}${v.fileUrl?` · <a href="${esc(v.fileUrl)}" target="_blank" rel="noopener">apri</a>`:""}</span></div>`).join("")}</div>`}).join("")
+    :`<div class="card empty">Nessun fornitore ancora. Si crea da solo quando carichi la prima fattura.</div>`;
+}
+
+/* ---------- etichette ---------- */
+const ALL_KEYS=[["glutine",/farin|grano|frumento|semol|orzo|segale|avena|farro|kamut|malto|pangrattat|pan di spagna|glutine/],["latte",/latte|burro|panna|ricotta|mascarpone|formagg|yogurt|siero|lattosio|caseina|parmigian|mozzarell/],["uova",/uov|tuorl|albume/],["frutta a guscio",/mandorl|nocciol|\bnoci\b|\bnoce\b|pistacch|anacard|pecan|macadamia|brasile/],["arachidi",/arachid/],["soia",/soia/],["sesamo",/sesamo/],["solfiti",/solfit|anidride solforosa/],["lupini",/lupin/],["senape",/senape/],["sedano",/sedano/],["pesce",/pesce|acciug|tonno|salmone/],["crostacei",/gamber|crostace/],["molluschi",/mollusc|vongol|cozz/]];
+function allergenOf(ing){const t=norm(ing);if(/farina di (riso|mais|mandorl|cocco|castagn|ceci)/.test(t)&&!/frumento/.test(t))return ALL_KEYS.filter(([a,r])=>a!=="glutine"&&r.test(t)).map(x=>x[0]);return ALL_KEYS.filter(([a,r])=>r.test(t)).map(x=>x[0])}
+function addDays(d,n){const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)}
+function fillShop(){$("sh-name").value=shop.name||"";$("sh-addr").value=shop.address||"";$("sh-vat").value=shop.vat||"";$("sh-size").value=shop.size||"62x100";
+  if(shop.logoUrl){$("sh-logo-prev").src=shop.logoUrl;$("sh-logo-prev").hidden=false;$("sh-logo-label").textContent="Cambia logo"}}
+let newLogo=null;
+$("sh-logo").addEventListener("change",()=>{newLogo=$("sh-logo").files[0];if(newLogo){$("sh-logo-prev").src=URL.createObjectURL(newLogo);$("sh-logo-prev").hidden=false}});
+$("sh-save").onclick=async()=>{
+  const data={...shop,name:$("sh-name").value.trim(),address:$("sh-addr").value.trim(),vat:$("sh-vat").value.trim(),size:$("sh-size").value};
+  try{if(newLogo){const ph=await storePhoto(await shrink(newLogo,800));data.logoUrl=ph.photoUrl;data.logoId=ph.photoId||""}
+    if(db)await db.doc("settings/shop").set(data);shop=data;newLogo=null;toast("Dati salvati")}catch(e){toast("Non salvati: "+(e.message||e.code))}
+};
+let lbBatch=null;
+function labelData(){
+  const b=lbBatch;const r=S.recipes.find(x=>x.id===b.recipeId)||{};
+  const ings=(r.ingredients||b.lots.map(l=>l.ingredient));
+  return {name:b.recipeName,ings:ings.map(i=>({t:i,al:allergenOf(i).length>0})),extraAll:(b.allergens||r.allergens||[]).filter(a=>!ings.some(i=>allergenOf(i).includes(a))),
+    lot:b.code,exp:$("lb-exp").value,dtype:r.dateType||"entro",weight:$("lb-weight").value.trim(),storage:r.storage||"",
+    shopName:shop.name||"",addr:shop.address||"",vat:shop.vat||"",logo:shop.logoUrl||""};
+}
+function renderLabelPrev(){
+  const d=labelData();
+  $("lb-prev").innerHTML=`<div class="label-prev"><div class="lh">${d.logo?`<img src="${esc(d.logo)}" alt="">`:""}<div class="ln">${esc(d.name)}</div></div>
+   <div><strong>Ingredienti:</strong> ${d.ings.map(i=>i.al?`<b>${esc(i.t)}</b>`:esc(i.t)).join(", ")}.</div>
+   ${d.extraAll.length?`<div>Può contenere: <b>${d.extraAll.map(esc).join(", ")}</b>.</div>`:""}
+   <div>${d.weight?`Peso netto: ${esc(d.weight)} · `:""}Lotto: ${esc(d.lot)}</div>
+   <div><strong>${d.dtype==="pref"?"Da consumarsi preferibilmente entro":"Da consumarsi entro"}: ${fmtDate(d.exp)}</strong></div>
+   ${d.storage?`<div>${esc(d.storage)}</div>`:""}
+   <div class="lsm">Prodotto da ${esc(d.shopName||"[nome attività: inseriscilo in Ricette]")}${d.addr?" · "+esc(d.addr):""}${d.vat?" · P.IVA "+esc(d.vat):""}</div></div>`;
+}
+function openLabel(id){
+  lbBatch=S.batches.find(b=>b.id===id);if(!lbBatch)return;const r=S.recipes.find(x=>x.id===lbBatch.recipeId)||{};
+  $("lb-weight").value=r.weight||"";$("lb-exp").value=addDays(lbBatch.date||today(),r.shelfDays||1);
+  $("lb-size").value=r.labelSize||shop.size||"62x100";$("lb-cw").value=r.labelW||"";$("lb-ch").value=r.labelH||"";$("lb-custom").hidden=$("lb-size").value!=="custom";
+  renderLabelPrev();go("v-label");
+}
+["lb-weight","lb-exp"].forEach(i=>$(i).addEventListener("input",renderLabelPrev));
+$("lb-size").addEventListener("change",()=>$("lb-custom").hidden=$("lb-size").value!=="custom");
+$("lb-back").onclick=()=>go("v-home");
+document.addEventListener("click",e=>{const b=e.target.closest("[data-label]");if(b)openLabel(b.dataset.label)});
+async function toDataUrl(url){const bl=await (await fetch(url)).blob();return await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(bl)})}
+function layoutLabel(doc,x,y,w,h,d,logo,fs,draw){
+  const pad=Math.max(1.5,Math.min(w,h)*0.05);let cy=y+pad;const iw=w-2*pad;const lh=fs*0.42;
+  const T=(t,tx,ty)=>{if(draw)doc.text(t,tx,ty)};
+  doc.setFont("helvetica","bold");doc.setFontSize(fs*1.6);
+  if(logo){const lH=Math.min(h*0.2,fs*2.2);const lW=Math.min(iw*0.35,lH*logo.r);const realH=lW/logo.r;if(draw)doc.addImage(logo.data,"JPEG",x+pad,cy,lW,realH);
+    const t=doc.splitTextToSize(d.name,iw-lW-2);T(t,x+pad+lW+2,cy+fs*0.55);cy+=Math.max(realH,t.length*fs*0.6)+fs*0.25}
+  else{const t=doc.splitTextToSize(d.name,iw);T(t,x+pad,cy+fs*0.55);cy+=t.length*fs*0.6+fs*0.2}
+  const tokens=[{t:"Ingredienti: ",b:true}];d.ings.forEach((i,k)=>tokens.push({t:(i.al?i.t.toUpperCase():i.t)+(k<d.ings.length-1?", ":"."),b:i.al}));
+  doc.setFontSize(fs);let cx=x+pad;cy+=lh;
+  tokens.forEach(tk=>tk.t.split(/(?<= )/).forEach(word=>{doc.setFont("helvetica",tk.b?"bold":"normal");const ww=doc.getTextWidth(word);
+    if(cx+ww>x+pad+iw&&cx>x+pad){cx=x+pad;cy+=lh}T(word,cx,cy);cx+=ww}));
+  cy+=lh*1.3;
+  const line=(t,b)=>{doc.setFont("helvetica",b?"bold":"normal");doc.splitTextToSize(t,iw).forEach(l=>{T(l,x+pad,cy);cy+=lh})};
+  if(d.extraAll.length)line("Può contenere: "+d.extraAll.join(", ").toUpperCase()+".",true);
+  line((d.weight?"Peso netto: "+d.weight+"   ":"")+"Lotto: "+d.lot,false);
+  line((d.dtype==="pref"?"Da consumarsi preferibilmente entro: ":"Da consumarsi entro: ")+fmtDate(d.exp),true);
+  if(d.storage)line(d.storage,false);
+  doc.setFontSize(fs*0.85);line("Prodotto da "+(d.shopName||"")+(d.addr?" - "+d.addr:"")+(d.vat?" - P.IVA "+d.vat:""),false);
+  return cy-lh+pad*0.6;
+}
+let lastFs=0;
+function drawLabel(doc,x,y,w,h,d,logo){
+  let fs=Math.min(11,Math.max(5,h/9));
+  while(fs>4&&layoutLabel(doc,x,y,w,h,d,logo,fs,false)>y+h)fs-=0.25;
+  lastFs=fs;layoutLabel(doc,x,y,w,h,d,logo,fs,true);
+}
+$("lb-pdf").onclick=async()=>{
+  if(!window.jspdf){toast("Generatore PDF non caricato, riprova");return}
+  const d=labelData();const n=Math.max(1,Math.min(200,parseInt($("lb-n").value)||1));
+  let logo=null;
+  if(d.logo){try{const data=await toDataUrl(d.logo);const im=new Image();await new Promise((r,j)=>{im.onload=r;im.onerror=j;im.src=data});
+    const c=document.createElement("canvas");c.width=im.width;c.height=im.height;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0);
+    logo={data:c.toDataURL("image/jpeg",.92),r:im.width/im.height}}catch{logo=null}}
+  const {jsPDF}=window.jspdf;const size=$("lb-size").value||"62x100";let doc;
+  if(size.startsWith("a4")){
+    const [cols,rows,w,h]=size==="a4-3x8"?[3,8,70,37.125]:[2,4,105,74.25];
+    doc=new jsPDF({unit:"mm",format:"a4"});
+    for(let i=0;i<n;i++){const k=i%(cols*rows);if(i&&!k)doc.addPage();drawLabel(doc,(k%cols)*w,Math.floor(k/cols)*h,w,h,d,logo)}
+  }else{
+    let [w,h]=size==="custom"?[parseFloat($("lb-cw").value),parseFloat($("lb-ch").value)]:size.split("x").map(Number);
+    if(!(w>=20&&h>=15&&w<=300&&h<=300)){toast("Scrivi larghezza e altezza in mm (minimo 20 × 15)");return}
+    doc=new jsPDF({unit:"mm",format:[w,h],orientation:w>h?"landscape":"portrait"});
+    for(let i=0;i<n;i++){if(i)doc.addPage([w,h],w>h?"landscape":"portrait");drawLabel(doc,0,0,w,h,d,logo)}
+  }
+  if(lastFs<4.5)toast("Il testo è molto piccolo: meglio un formato più grande");
+  const blob=doc.output("blob");const fn=`etichetta-${d.lot}.pdf`;
+  if(downloads){try{await downloads.save({filename:fn,data:blob});$("lb-note").textContent="PDF pronto: aprilo e stampalo dalla stampante delle etichette."}catch(e){if(e.code!=="cancelled")toast("PDF non salvato: "+(e.message||e.code))}}
+  else{$("lb-note").textContent="Il salvataggio dei file non è disponibile in questa vista."}
+};
+
+/* ---------- registri ---------- */
+let devices=[{name:"Frigo pasticceria",min:0,max:4},{name:"Frigo laboratorio",min:0,max:4},{name:"Congelatore",min:-30,max:-18},{name:"Abbattitore (fine ciclo)",min:-40,max:3},{name:"Vetrina refrigerata pasticceria",min:0,max:4},{name:"Frigo bar (latte e bevande)",min:0,max:4},{name:"Vetrina bar (panini e tramezzini)",min:0,max:4},{name:"Lavastoviglie (risciacquo)",min:80,max:95}];
+const AREE=["Piani di lavoro","Impastatrice e attrezzi","Forno","Frigoriferi","Pavimenti laboratorio","Lavelli","Vetrine pasticceria","Macchina caffè e lancia vapore","Lavastoviglie e lavabicchieri","Banco bar","Tavoli e sala","Bagni e spogliatoio"];
+const REGS={
+  temp:{label:"Temperature",hint:"Due volte al giorno, per ogni frigo e congelatore.",fields:[["device","Attrezzatura","device"],["value","Temperatura °C","number"],["action","Azione correttiva (se fuori limite)","text"],["who","Operatore","text"]]},
+  clean:{label:"Pulizie",hint:"Spunta le zone pulite e sanificate oggi.",fields:[["areas","Zone pulite","multi"],["product","Detergente / sanificante usato","text"],["who","Operatore","text"]]},
+  nc:{label:"Non conformità",hint:"Problemi trovati (merce danneggiata, temperatura sbagliata, prodotto scaduto) e cosa hai fatto. Anche i richiami.",fields:[["kind","Tipo","select:Non conformità|Richiamo prodotto|Reclamo cliente"],["what","Cosa è successo","textarea"],["lot","Lotto coinvolto","text"],["action","Azione correttiva","textarea"],["who","Responsabile","text"]]},
+  train:{label:"Formazione",hint:"Attestati HACCP del personale, con la scadenza.",fields:[["person","Persona","text"],["course","Corso","text"],["expiry","Scadenza attestato","date"],["photo","Foto attestato","photo"]]},
+  pest:{label:"Disinfestazione",hint:"Interventi della ditta e controllo delle trappole.",fields:[["company","Ditta","text"],["outcome","Esito","select:Nessuna infestazione|Tracce trovate|Intervento eseguito"],["notes","Note","textarea"],["photo","Foto del rapporto","photo"]]},
+  insp:{label:"Ispezioni ASL",hint:"Controlli ricevuti da ASL, NAS o altri enti.",fields:[["body","Ente","text"],["outcome","Esito","select:Favorevole|Con prescrizioni|Sanzione"],["notes","Prescrizioni e note","textarea"],["photo","Foto del verbale","photo"]]}
+};
+let curReg="temp";
+function devOf(n){return devices.find(d=>d.name===n)}
+function tempOk(l){const d=devOf(l.device);const v=parseFloat(l.value);return !d||isNaN(v)||(v>=d.min&&v<=d.max)}
+function renderRegs(){
+  $("g-tabs").innerHTML=Object.entries(REGS).map(([k,r])=>`<button aria-pressed="${k===curReg}" data-reg="${k}">${r.label}</button>`).join("");
+  const R=REGS[curReg];
+  if(!$("g-form").dataset.reg||$("g-form").dataset.reg!==curReg||$("g-form").dataset.dev!==JSON.stringify(devices)){
+    $("g-form").dataset.reg=curReg;$("g-form").dataset.dev=JSON.stringify(devices);
+    $("g-form").innerHTML=`<h2>${R.label}</h2><div class="note">${R.hint}</div><label class="f">Data<input type="date" id="g-date" value="${today()}"></label>`+R.fields.map(([k,lab,t])=>{
+      if(t==="device")return `<label class="f">${lab}<select id="g-${k}">${devices.map(d=>`<option>${esc(d.name)}</option>`).join("")}</select></label>`;
+      if(t==="multi")return `<div class="f">${lab}</div><div class="chips" id="g-${k}">${AREE.map((a,i)=>`<label class="toggle"><input type="checkbox" value="${esc(a)}">${esc(a)}</label>`).join("")}</div>`;
+      if(t.startsWith("select:"))return `<label class="f">${lab}<select id="g-${k}">${t.slice(7).split("|").map(o=>`<option>${esc(o)}</option>`).join("")}</select></label>`;
+      if(t==="textarea")return `<label class="f">${lab}<textarea id="g-${k}" style="min-height:70px"></textarea></label>`;
+      if(t==="photo")return `<label class="photo-pick"><input id="g-${k}" type="file" accept="image/*" capture="environment"><strong>${lab}</strong><span class="note" id="g-${k}-n">Facoltativa</span></label>`;
+      return `<label class="f">${lab}<input id="g-${k}" ${t==="number"?'inputmode="decimal"':""} type="${t==="date"?"date":"text"}"></label>`}).join("")+
+      `<div class="note" id="g-warn"></div><button class="primary" id="g-save">Registra</button>`;
+    const ph=$("g-form").querySelector('input[type=file]');if(ph)ph.addEventListener("change",()=>{$(ph.id+"-n").textContent="Foto pronta"});
+    const v=$("g-value");if(v)v.addEventListener("input",()=>{const d=devOf($("g-device").value);const n=parseFloat(v.value.replace(",","."));
+      $("g-warn").innerHTML=d&&!isNaN(n)&&(n<d.min||n>d.max)?`<span class="chip bad">Fuori limite (${d.min}…${d.max} °C): scrivi l'azione correttiva</span>`:""});
+  }
+  const rows=S.logs.filter(l=>l.type===curReg).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.createdAt-a.createdAt).slice(0,30);
+  $("g-list").innerHTML=rows.length?rows.map(l=>`<div class="card"><div class="row"><strong class="grow">${fmtDate(l.date)}</strong>${l.type==="temp"?(tempOk(l)?'<span class="chip">regolare</span>':'<span class="chip bad">fuori limite</span>'):""}${l.example?'<span class="chip ex">esempio</span>':""}</div>
+    <div class="sub">${R.fields.filter(f=>f[2]!=="photo").map(([k,lab])=>{const v=Array.isArray(l[k])?l[k].join(", "):l[k];return v?`${lab}: ${esc(k==="expiry"?fmtDate(v):v)}`:""}).filter(Boolean).join(" · ")}</div>
+    ${l.photoUrl?`<img class="thumb" src="${esc(l.photoUrl)}" alt="">`:""}</div>`).join(""):`<div class="card empty">Ancora nessuna registrazione in ${R.label}</div>`;
+  $("g-devs").value=devices.map(d=>`${d.name}; ${d.min}; ${d.max}`).join("\n");
+}
+$("g-tabs").addEventListener("click",e=>{const b=e.target.closest("[data-reg]");if(b){curReg=b.dataset.reg;renderRegs()}});
+$("g-form").addEventListener("click",async e=>{if(!e.target.closest("#g-save"))return;
+  const R=REGS[curReg];const row={type:curReg,date:$("g-date").value||today(),createdAt:Date.now()};
+  for(const [k,,t] of R.fields){
+    if(t==="multi")row[k]=[...$("g-"+k).querySelectorAll("input:checked")].map(i=>i.value);
+    else if(t==="photo"){const f=$("g-"+k).files[0];if(f)Object.assign(row,await storePhoto(await shrink(f)))}
+    else row[k]=$("g-"+k).value.trim();
+  }
+  if(curReg==="temp"){row.value=row.value.replace(",",".");if(row.value===""||isNaN(parseFloat(row.value))){toast("Scrivi la temperatura");return}if(!tempOk(row)&&!row.action){toast("Temperatura fuori limite: scrivi l'azione correttiva");return}}
+  if(curReg==="clean"&&!row.areas.length){toast("Spunta almeno una zona");return}
+  try{await put("logs",uid(),row);toast("Registrato");$("g-form").dataset.reg="";renderRegs()}catch(err){toast("Non registrato: "+(err.message||err.code))}
+});
+$("g-devs-save").onclick=async()=>{
+  const list=$("g-devs").value.split("\n").map(l=>l.split(";").map(x=>x.trim())).filter(x=>x[0]).map(([name,min,max])=>({name,min:parseFloat(min)||0,max:parseFloat(max)||0}));
+  if(!list.length){toast("Scrivi almeno un'attrezzatura");return}
+  devices=list;if(db)await db.doc("settings/devices").set({list});toast("Attrezzature salvate");renderRegs()
+};
+function regAlerts(){
+  const out=[];const t=today();
+  if(!S.logs.some(l=>l.type==="temp"&&l.date===t))out.push(`<div class="card alert"><h3>Temperature di oggi non registrate</h3><button class="small" data-reg-go="temp">Registra ora</button></div>`);
+  if(!S.logs.some(l=>l.type==="clean"&&l.date===t))out.push(`<div class="card alert"><h3>Pulizie di oggi non registrate</h3><button class="small" data-reg-go="clean">Registra ora</button></div>`);
+  const exp=S.logs.filter(l=>l.type==="train"&&l.expiry&&daysTo(l.expiry)<=30);
+  if(exp.length)out.push(`<div class="card alert"><h3>Attestati HACCP in scadenza</h3><div class="sub">${exp.map(l=>esc(l.person)+" ("+fmtDate(l.expiry)+")").join(", ")}</div></div>`);
+  return out.join("");
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-reg-go]");if(b){curReg=b.dataset.regGo;renderRegs();go("v-reg")}});
+$("x-from").value=today().slice(0,8)+"01";$("x-to").value=today();
+$("x-pdf").onclick=async()=>{
+  if(!window.jspdf){toast("Generatore PDF non caricato, riprova");return}
+  const from=$("x-from").value||"0000",to=$("x-to").value||"9999";const inR=d=>d&&d>=from&&d<=to;
+  const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});let y=18;const L=14,W=182;
+  const nl=(h=5)=>{y+=h;if(y>282){doc.addPage();y=18}};
+  const txt=(t,b,size)=>{doc.setFont("helvetica",b?"bold":"normal");doc.setFontSize(size||9.5);doc.splitTextToSize(String(t),W).forEach(l=>{doc.text(l,L,y);nl((size||9.5)*0.45)})};
+  const sec=t=>{nl(4);if(y>260){doc.addPage();y=18}doc.setDrawColor(30,107,87);doc.line(L,y-2,L+W,y-2);nl(4);txt(t,true,13);nl(1)};
+  txt("Registro di autocontrollo HACCP",true,16);
+  txt((shop.name||"[nome attività]")+(shop.address?" - "+shop.address:"")+(shop.vat?" - P.IVA "+shop.vat:""),false,10);
+  txt(`Periodo: ${fmtDate(from)} - ${fmtDate(to)}   ·   Generato il ${new Date().toLocaleString("it-IT")}`,false,9);
+  for(const [k,R] of Object.entries(REGS)){
+    const rows=S.logs.filter(l=>l.type===k&&(k==="train"||inR(l.date))).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+    sec(R.label+` (${rows.length})`);
+    if(!rows.length){txt("Nessuna registrazione nel periodo.");continue}
+    rows.forEach(l=>txt(fmtDate(l.date)+"  "+R.fields.filter(f=>f[2]!=="photo").map(([f,lab])=>{const v=Array.isArray(l[f])?l[f].join(", "):l[f];return v?`${lab}: ${f==="expiry"?fmtDate(v):v}${f==="value"?" °C":""}`:""}).filter(Boolean).join(" | ")+(k==="temp"&&!tempOk(l)?"  [FUORI LIMITE]":"")+(l.photoUrl?"  [foto allegata in app]":"")));
+  }
+  const inv=S.invoices.filter(v=>inR(v.date||new Date(v.createdAt).toISOString().slice(0,10)));
+  sec(`Ricevimento merci e fatture (${inv.length})`);
+  inv.forEach(v=>txt(`${fmtDate(v.date)}  ${v.supplier}  Fatt. ${v.number||"-"}: `+(v.lines||[]).map(x=>`${x.ingredient}${x.qty?" "+x.qty:""} lotto ${x.code||"-"} scad. ${fmtDate(x.expiry)}`).join("; ")));
+  if(!inv.length)txt("Nessuna fattura nel periodo.");
+  const bt=S.batches.filter(b=>inR(b.date)).sort((a,b)=>a.date.localeCompare(b.date));
+  sec(`Produzioni e tracciabilità lotti (${bt.length})`);
+  bt.forEach(b=>txt(`${fmtDate(b.date)}  ${b.recipeName}  Lotto ${b.code}${b.qty?" ("+b.qty+")":""}: `+(b.lots||[]).map(l=>`${l.ingredient} ${l.lotCode||"senza lotto"}`).join(", ")));
+  if(!bt.length)txt("Nessuna produzione nel periodo.");
+  sec("Ricette e allergeni");
+  S.recipes.forEach(r=>txt(`${r.name}: ${(r.ingredients||[]).join(", ")}. Allergeni: ${(r.allergens||[]).join(", ")||"nessuno"}.`));
+  const pages=doc.getNumberOfPages();for(let i=1;i<=pages;i++){doc.setPage(i);doc.setFontSize(8);doc.setFont("helvetica","normal");doc.text(`Pagina ${i} di ${pages}`,L+W,290,{align:"right"})}
+  const blob=doc.output("blob");
+  if(downloads){try{await downloads.save({filename:`registro-haccp-${from}-${to}.pdf`,data:blob});toast("Fascicolo pronto")}catch(e){if(e.code!=="cancelled")toast("PDF non salvato: "+(e.message||e.code))}}
+  else toast("Il salvataggio dei file non è disponibile in questa vista");
+};
+
+$("x-all").onclick=async()=>{
+  if(!window.jspdf){toast("Generatore PDF non caricato, riprova");return}
+  if(!S.recipes.length){toast("Prima inserisci le ricette");return}
+  const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});let y=20;const L=14,W=182;
+  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.text("Informazioni sugli allergeni",L,y);y+=7;
+  doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+  doc.splitTextToSize((shop.name||"")+" - Reg. UE 1169/2011. I prodotti indicati contengono le sostanze evidenziate. Per informazioni chiedere al personale.",W).forEach(l=>{doc.text(l,L,y);y+=4.5});y+=3;
+  [...S.recipes].sort((a,b)=>a.name.localeCompare(b.name)).forEach(r=>{
+    if(y>275){doc.addPage();y=20}
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text(r.name,L,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(10);
+    const t=(r.allergens||[]).length?r.allergens.map(a=>a.toUpperCase()).join(", "):"Nessun allergene tra i 14 del regolamento";
+    const lines=doc.splitTextToSize(t,W-70);lines.forEach((l,i)=>doc.text(l,L+70,y+i*4.5));
+    y+=Math.max(1,lines.length)*4.5+2;doc.setDrawColor(210);doc.line(L,y-1.5,L+W,y-1.5);y+=2.5});
+  const blob=doc.output("blob");
+  if(downloads){try{await downloads.save({filename:"cartello-allergeni.pdf",data:blob});toast("Cartello pronto")}catch(e){if(e.code!=="cancelled")toast("PDF non salvato: "+(e.message||e.code))}}
+  else toast("Il salvataggio dei file non è disponibile in questa vista");
+};
+
+/* ---------- navigazione ---------- */
+function go(v){
+  document.querySelectorAll("section.view").forEach(s=>s.hidden=s.id!==v);
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-current",x.dataset.v===v?"true":"false"));
+  window.scrollTo({top:0});
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.v));
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+try{if(!localStorage.getItem("qh-guide-ok"))$("guide").hidden=false}catch{$("guide").hidden=false}
+$("guide-ok").onclick=()=>{$("guide").hidden=true;try{localStorage.setItem("qh-guide-ok","1")}catch{}};
+function renderAlerts(){
+  const open=S.lots.filter(l=>l.status!=="finito");
+  const exp=open.filter(l=>{const n=daysTo(l.expiry);return n!==null&&n<=7});
+  const noLot=open.filter(l=>!l.code||l.code==="(senza lotto)");
+  const out=[];
+  if(exp.length)out.push(`<div class="card alert"><h3>${exp.length} lott${exp.length===1?"o scade":"i scadono"} entro 7 giorni</h3><div class="sub">${exp.map(l=>esc(l.ingredient)+" ("+fmtDate(l.expiry)+")").join(", ")}</div><button class="small" data-go2="v-lots">Vedi lotti</button></div>`);
+  if(noLot.length)out.push(`<div class="card alert"><h3>${noLot.length} prodott${noLot.length===1?"o":"i"} senza codice lotto</h3><div class="sub">${noLot.map(l=>esc(l.ingredient)).join(", ")}</div></div>`);
+  if(!S.recipes.length)out.push(`<div class="card alert"><h3>Inizia dalle ricette</h3><div class="sub">Senza ricette l'app non sa quali lotti collegare.</div><button class="small" data-go2="v-rec">Aggiungi una ricetta</button></div>`);
+  $("h-alerts").innerHTML=regAlerts()+out.join("");
+}
+$("h-alerts").addEventListener("click",e=>{const b=e.target.closest("[data-go2]");if(b)go(b.dataset.go2)});
+function renderAll(){renderRegs();renderAlerts();renderInvoices();renderRecipeSelect();renderLinks();renderLots();renderRecipes();renderTrace()}
+
+/* ---------- avvio ---------- */
+renderAllergenChips();renderAll();
+(async()=>{
+  try{db=await claude.use("db")}catch{db=null}
+  if(db){["recipes","lots","batches","invoices","logs"].forEach(listen);setStatus("Salvataggio attivo","ok")}
+  else setStatus("Prova senza salvataggio","off");
+  if(db)db.doc("settings/devices").onSnapshot(d=>{if(d.exists){devices=d.data().list||devices}renderRegs()},()=>{});
+  if(db)db.doc("settings/shop").onSnapshot(d=>{shop=d.exists?d.data():{};fillShop()},()=>{});
+  try{downloads=await claude.use("downloads")}catch{downloads=null}
+  try{assets=await claude.use("assets")}catch{assets=null}
+  try{sample=await claude.use("sample");const lim=sample&&await sample.limits().catch(()=>null);if(!lim?.images)sample=null}catch{sample=null}
+  if(!sample)$("l-ocr-note").textContent="Scrivi lotto e scadenza dall'etichetta";
+})();
+</script>
+
+</body>
+</html>
