@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1E6B57">
+<link rel="icon" href="icona.svg" type="image/svg+xml">
+<title>Manuale Quaderno HACCP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Manuale pensato per chi ha DSA: carattere senza grazie e grande, interlinea ampia,
+   sfondo crema (meno abbagliante del bianco), niente corsivo, niente maiuscolo lungo,
+   testo allineato a sinistra, frasi brevi, un'azione per passo, numeri uguali a quelli nelle foto. */
+:root{
+  --bg:#FBF7EE; --surface:#FFFFFF; --fg:#1F2622; --muted:#4A5650; --line:#DCD8CC;
+  --accent:#1E6B57; --accent-ink:#FFFFFF; --accent-soft:#E2EFEA;
+  --mark:#C2185B; --warn:#8A5200; --warn-soft:#FBEFD9; --bad:#A3302A;
+  --size:19px;
+  --f:"Atkinson Hyperlegible", Verdana, Arial, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141917; --surface:#1C2320; --fg:#ECEFEA; --muted:#B4BFB9; --line:#323C37;
+  --accent:#5FC0A3; --accent-ink:#0C1A15; --accent-soft:#1D3530;
+  --mark:#F06292; --warn:#F0B45A; --warn-soft:#3A2C14; --bad:#F08A80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141917; --surface:#1C2320; --fg:#ECEFEA; --muted:#B4BFB9; --line:#323C37;
+  --accent:#5FC0A3; --accent-ink:#0C1A15; --accent-soft:#1D3530;
+  --mark:#F06292; --warn:#F0B45A; --warn-soft:#3A2C14; --bad:#F08A80; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f);font-size:var(--size);line-height:1.7;letter-spacing:.02em;word-spacing:.08em;text-align:left;-webkit-text-size-adjust:100%}
+em,i{font-style:normal}
+b,strong{font-weight:700}
+a{color:var(--accent);text-underline-offset:3px}
+
+/* barra in alto, sempre visibile */
+.bar{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:2px solid var(--line);padding:8px max(12px,env(safe-area-inset-left,0px));padding-top:max(8px,env(safe-area-inset-top,0px))}
+.bar .in{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bar .grow{flex:1}
+.btn{font:inherit;font-size:16px;font-weight:700;letter-spacing:.01em;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 12px;min-height:48px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.wrap{max-width:760px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-left,0px)) 80px;display:flex;flex-direction:column;gap:28px}
+h1{font-size:1.6em;line-height:1.25;margin:0}
+h2{font-size:1.35em;line-height:1.3;margin:0;display:flex;gap:12px;align-items:center}
+h2 .ico{font-size:1.2em}
+h3{font-size:1.1em;margin:8px 0 0}
+p{margin:0;max-width:34em}
+.lead{color:var(--muted)}
+
+/* indice: grandi pulsanti */
+.indice{display:grid;grid-template-columns:1fr;gap:10px;list-style:none;margin:0;padding:0}
+@media (min-width:600px){.indice{grid-template-columns:1fr 1fr}}
+.indice a{display:flex;gap:12px;align-items:center;padding:12px 14px;min-height:64px;background:var(--surface);border:2px solid var(--line);border-radius:14px;color:var(--fg);text-decoration:none;font-weight:700;line-height:1.35}
+.indice a .ico{font-size:1.5em;flex:none;width:1.6em;text-align:center}
+.indice a small{display:block;font-weight:400;color:var(--muted);font-size:.85em}
+
+section.cap{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:20px 18px;display:flex;flex-direction:column;gap:18px}
+.serve{background:var(--accent-soft);border-radius:12px;padding:12px 14px}
+.serve > b:first-child{display:block}
+
+/* foto dello schermo */
+figure{margin:0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+figure img{width:100%;max-width:320px;height:auto;border:2px solid var(--line);border-radius:16px;display:block;background:#fff}
+figcaption{font-size:.85em;color:var(--muted)}
+.foto-passi{display:flex;flex-direction:column;gap:16px}
+
+/* passi numerati: il numero è lo stesso della foto */
+ol.passi{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+ol.passi li{display:flex;gap:14px;align-items:flex-start}
+ol.passi .n{flex:none;width:36px;height:36px;border-radius:50%;background:var(--mark);color:#fff;font-weight:700;font-size:19px;line-height:36px;text-align:center;letter-spacing:0;margin-top:-2px}
+ol.passi .n.v{background:var(--accent);color:var(--accent-ink)}
+ol.passi li > div{max-width:32em}
+.tasto{display:inline;border:2px solid var(--line);border-radius:8px;padding:0 6px;font-weight:700;background:var(--bg);line-height:1.9;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+.box{border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.box .ico{font-size:1.4em;line-height:1.2;flex:none}
+.box.att{background:var(--warn-soft);border-left:6px solid var(--warn)}
+.box.ok{background:var(--accent-soft);border-left:6px solid var(--accent)}
+
+.regole{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.regole li{display:flex;gap:14px;align-items:flex-start}
+.regole .ico{font-size:1.5em;line-height:1.2;flex:none;width:1.5em;text-align:center}
+
+.giorno{display:grid;grid-template-columns:1fr;gap:4px 14px;align-items:start}
+.giorno .q{font-weight:700}
+.giorno p{margin-bottom:10px}
+@media (min-width:600px){.giorno{grid-template-columns:14em 1fr}.giorno p{margin:0}}
+
+dl.parole{margin:0;display:flex;flex-direction:column;gap:12px}
+dl.parole dt{font-weight:700}
+dl.parole dd{margin:0}
+
+.piedi{display:flex;gap:10px;flex-wrap:wrap}
+.ascolta[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+@media print{
+  :root{--size:14pt;--bg:#fff}
+  .bar,.piedi,.noprint{display:none!important}
+  body{background:#fff}
+  .wrap{max-width:none;padding:0;gap:0}
+  section.cap{border:0;border-radius:0;padding:0 0 10mm;break-before:page}
+  .foto-passi{display:grid;grid-template-columns:62mm 1fr;gap:8mm;align-items:start;break-inside:avoid}
+  figure img{max-width:62mm}
+  ol.passi li,.box{break-inside:avoid}
+  ol.passi .n{margin-top:0}
+  h3{break-after:avoid}
+  a{color:inherit;text-decoration:none}
+}
+@page{size:A4;margin:14mm}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="in">
+    <a class="btn primary" href="./">← Torna all'app</a>
+    <a class="btn" href="#indice">Indice</a>
+    <span class="grow"></span>
+    <button class="btn" type="button" id="meno" aria-label="Testo più piccolo">A−</button>
+    <button class="btn" type="button" id="piu" aria-label="Testo più grande">A+</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+<header class="cap-intro" style="display:flex;flex-direction:column;gap:12px">
+  <h1>Manuale del Quaderno HACCP</h1>
+  <p class="lead">Ogni capitolo ha la foto dello schermo. I <b>numeri rosa</b> nella foto sono gli stessi dei passi sotto.</p>
+  <p class="lead">Le foto usano nomi e dati finti.</p>
+  <div class="box ok noprint"><span class="ico">🔊</span><p>Preferisci ascoltare? In ogni capitolo tocca <span class="tasto">Ascolta</span>: il telefono legge il testo ad alta voce.</p></div>
+</header>
+
+<nav aria-labelledby="t-indice" style="display:flex;flex-direction:column;gap:12px">
+  <h2 id="t-indice"><span id="indice"></span>Indice</h2>
+  <ul class="indice">
+    <li><a href="#regole"><span class="ico">📌</span><span>Prima di cominciare<small>5 regole, da leggere</small></span></a></li>
+    <li><a href="#giorno"><span class="ico">🗓️</span><span>La giornata tipo<small>Cosa fare e quando</small></span></a></li>
+    <li><a href="#entrare"><span class="ico">🔑</span><span>1. Entrare nell'app</span></a></li>
+    <li><a href="#home"><span class="ico">📲</span><span>2. Mettere l'app sul telefono</span></a></li>
+    <li><a href="#oggi"><span class="ico">🏠</span><span>3. La schermata Oggi</span></a></li>
+    <li><a href="#accessi"><span class="ico">👥</span><span>4. Accessi: aggiungere il personale<small>Solo per il titolare</small></span></a></li>
+    <li><a href="#merce"><span class="ico">🚚</span><span>5. È arrivata merce: la fattura</span></a></li>
+    <li><a href="#lotti"><span class="ico">📷</span><span>6. Ho aperto una confezione: i lotti</span></a></li>
+    <li><a href="#ricette"><span class="ico">📒</span><span>7. Le ricette</span></a></li>
+    <li><a href="#produci"><span class="ico">🥐</span><span>8. Ho prodotto</span></a></li>
+    <li><a href="#etichette"><span class="ico">🏷️</span><span>9. Le etichette</span></a></li>
+    <li><a href="#registri"><span class="ico">🌡️</span><span>10. I registri per l'ASL</span></a></li>
+    <li><a href="#richiamo"><span class="ico">🔎</span><span>11. Richiamo: cercare un lotto</span></a></li>
+    <li><a href="#problemi"><span class="ico">🛟</span><span>12. Se qualcosa non va</span></a></li>
+    <li><a href="#parole"><span class="ico">📖</span><span>Parole difficili, spiegate</span></a></li>
+  </ul>
+</nav>
+
+<!-- REGOLE -->
+<section class="cap primo" id="regole">
+  <h2><span class="ico">📌</span>Prima di cominciare</h2>
+  <ul class="regole">
+    <li><span class="ico">📶</span><p><b>Serve internet.</b> Guarda la scritta in alto. Verde <span class="tasto">SALVATAGGIO ATTIVO</span> vuol dire: tutto a posto. Se è arancione, aspetta a salvare e controlla il Wi-Fi.</p></li>
+    <li><span class="ico">👀</span><p><b>Controlla sempre prima di salvare.</b> L'app può leggere fatture ed etichette da sola. Ma può sbagliare. Guarda lotto e scadenza.</p></li>
+    <li><span class="ico">✍️</span><p><b>Usa sempre lo stesso nome per un ingrediente.</b> Per esempio scrivi sempre <b>farina 00</b>. Così l'app collega i lotti giusti.</p></li>
+    <li><span class="ico">🔒</span><p><b>Ognuno entra con la sua email.</b> Non dare la tua password ad altri.</p></li>
+    <li><span class="ico">💬</span><p><b>Un dubbio o un errore? Dillo a Rosa.</b> Va bene anche una foto dello schermo. Ogni consiglio serve a migliorare l'app.</p></li>
+  </ul>
+  <div class="piedi"></div>
+</section>
+
+<!-- GIORNATA -->
+<section class="cap" id="giorno">
+  <h2><span class="ico">🗓️</span>La giornata tipo</h2>
+  <p>Ecco cosa fare e quando. Il resto lo fa l'app.</p>
+  <div class="giorno">
+    <span class="q">☀️ Mattina</span><p>Registra le <b>temperature</b> di frighi e congelatori. <a href="#registri">Come si fa</a></p>
+    <span class="q">🚚 Arriva merce</span><p>Carica o fotografa la <b>fattura</b>. <a href="#merce">Come si fa</a></p>
+    <span class="q">📦 Apri una confezione senza fattura</span><p>Fotografa l'<b>etichetta</b>. <a href="#lotti">Come si fa</a></p>
+    <span class="q">🥐 Hai finito un prodotto</span><p>Tocca <b>Ho prodotto</b>. <a href="#produci">Come si fa</a></p>
+    <span class="q">🗑️ Finisce una confezione</span><p>In <b>Lotti</b> tocca <span class="tasto">Finito</span>. <a href="#lotti">Come si fa</a></p>
+    <span class="q">🌙 Sera</span><p>Registra di nuovo le <b>temperature</b> e le <b>pulizie</b>.</p>
+  </div>
+  <div class="box ok"><span class="ico">🔔</span><p>Hai dimenticato qualcosa? La schermata <b>Oggi</b> te lo ricorda con un avviso.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 1 ENTRARE -->
+<section class="cap" id="entrare">
+  <h2><span class="ico">🔑</span>1. Entrare nell'app</h2>
+  <div class="serve"><b>Indirizzo dell'app:</b> lcanali0.github.io/quaderno-haccp</div>
+  <div class="foto-passi">
+    <figure><img src="manuale/01.webp" width="780" height="1688" alt="Schermata per entrare: email, password, Entra, Prima volta? Crea la password" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Scrivi la tua <b>email</b>.</div></li>
+      <li><span class="n">2</span><div>Scrivi la tua <b>password</b>.</div></li>
+      <li><span class="n">3</span><div>Tocca <span class="tasto">Entra</span>.</div></li>
+      <li><span class="n">4</span><div><b>È la prima volta?</b> Leggi il riquadro qui sotto.</div></li>
+      <li><span class="n">5</span><div>Questo pulsante apre il manuale.</div></li>
+    </ol>
+  </div>
+  <h3>La prima volta</h3>
+  <ol class="passi">
+    <li><span class="n v">1</span><div>Chiedi a Rosa di <b>aggiungere la tua email</b>.</div></li>
+    <li><span class="n v">2</span><div>Scrivi la tua email.</div></li>
+    <li><span class="n v">3</span><div>Inventa una password. Almeno 6 caratteri.</div></li>
+    <li><span class="n v">4</span><div>Tocca <span class="tasto">Prima volta? Crea la password</span>.</div></li>
+    <li><span class="n v">5</span><div>Se ti arriva un'email, apri il link dentro l'email.</div></li>
+    <li><span class="n v">6</span><div>Torna nell'app. Tocca <span class="tasto">Entra</span>.</div></li>
+  </ol>
+  <div class="box att"><span class="ico">⚠️</span><p>Vedi la scritta <b>"Questa email non è ancora abilitata"</b>? Rosa non ti ha ancora aggiunto. Chiedi a lei.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 2 HOME -->
+<section class="cap" id="home">
+  <h2><span class="ico">📲</span>2. Mettere l'app sul telefono</h2>
+  <p>Così la apri con un tocco, come le altre app. Si fa una volta sola.</p>
+  <h3>🍎 iPhone</h3>
+  <ol class="passi">
+    <li><span class="n v">1</span><div>Apri l'indirizzo dell'app con <b>Safari</b>.</div></li>
+    <li><span class="n v">2</span><div>Tocca il tasto <b>Condividi</b>: il quadrato con la freccia in su <span class="tasto">⬆</span>.</div></li>
+    <li><span class="n v">3</span><div>Scorri in giù. Tocca <span class="tasto">Aggiungi alla schermata Home</span>.</div></li>
+    <li><span class="n v">4</span><div>Tocca <span class="tasto">Aggiungi</span>.</div></li>
+  </ol>
+  <h3>🤖 Android</h3>
+  <ol class="passi">
+    <li><span class="n v">1</span><div>Apri l'indirizzo dell'app con <b>Chrome</b>.</div></li>
+    <li><span class="n v">2</span><div>Tocca i <b>tre puntini</b> in alto a destra <span class="tasto">⋮</span>.</div></li>
+    <li><span class="n v">3</span><div>Tocca <span class="tasto">Aggiungi a schermata Home</span> oppure <span class="tasto">Installa app</span>.</div></li>
+    <li><span class="n v">4</span><div>Tocca <span class="tasto">Installa</span> o <span class="tasto">Aggiungi</span>.</div></li>
+  </ol>
+  <div class="box ok"><span class="ico">✅</span><p>Ora trovi l'icona verde <b>HACCP</b> sul telefono.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 3 OGGI -->
+<section class="cap" id="oggi">
+  <h2><span class="ico">🏠</span>3. La schermata Oggi</h2>
+  <div class="serve"><b>A cosa serve:</b> è la prima schermata. Da qui parte tutto.</div>
+  <div class="foto-passi">
+    <figure><img src="manuale/02.webp" width="780" height="1688" alt="Schermata Oggi con i tre pulsanti grandi, gli avvisi e la barra in basso" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div><b>Scritta verde:</b> l'app è collegata. Arancione: controlla internet.</div></li>
+      <li><span class="n">2</span><div><span class="tasto">Manuale</span> apre questa guida.</div></li>
+      <li><span class="n">3</span><div><span class="tasto">Accessi</span> lo vede solo il titolare. <a href="#accessi">Capitolo 4</a></div></li>
+      <li><span class="n">4</span><div><span class="tasto">Esci</span> chiude il tuo accesso.</div></li>
+      <li><span class="n">5</span><div><b>Ho prodotto:</b> hai finito un prodotto. <a href="#produci">Capitolo 8</a></div></li>
+      <li><span class="n">6</span><div><b>È arrivata merce:</b> carichi la fattura. <a href="#merce">Capitolo 5</a></div></li>
+      <li><span class="n">7</span><div><b>Ho aperto una confezione:</b> foto dell'etichetta. <a href="#lotti">Capitolo 6</a></div></li>
+      <li><span class="n">8</span><div><b>Avvisi:</b> le cose da fare. Tocca il pulsante dentro l'avviso.</div></li>
+      <li><span class="n">9</span><div><b>Barra in basso:</b> le 6 schermate. Oggi, Produci, Merce, Lotti, Registri, Ricette.</div></li>
+    </ol>
+  </div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 4 ACCESSI -->
+<section class="cap" id="accessi">
+  <h2><span class="ico">👥</span>4. Accessi: aggiungere il personale</h2>
+  <div class="serve"><b>Solo per il titolare.</b> Decidi chi può entrare nell'app. Questo elenco è solo dell'HACCP: non cambia niente nell'app degli ordini.</div>
+  <p>Tocca <span class="tasto">Accessi</span> in alto.</p>
+  <div class="foto-passi">
+    <figure><img src="manuale/03.webp" width="780" height="1688" alt="Finestra Chi può entrare nell'HACCP con l'elenco delle email" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Scrivi l'<b>email</b> della persona.</div></li>
+      <li><span class="n">2</span><div><b>Titolare:</b> spunta solo se anche questa persona deve gestire l'elenco. Di solito no.</div></li>
+      <li><span class="n">3</span><div>Tocca <span class="tasto">Aggiungi</span>.</div></li>
+      <li><span class="n">4</span><div><span class="tasto">Togli</span>: quella persona non entra più.</div></li>
+      <li><span class="n">5</span><div>Tocca <span class="tasto">Chiudi</span>.</div></li>
+    </ol>
+  </div>
+  <div class="box ok"><span class="ico">📩</span><p>Poi di' alla persona: apri l'app e segui <a href="#entrare">"La prima volta"</a>.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 5 MERCE -->
+<section class="cap" id="merce">
+  <h2><span class="ico">🚚</span>5. È arrivata merce: la fattura</h2>
+  <div class="serve"><b>A cosa serve:</b> ogni prodotto della fattura diventa un <b>lotto</b>, con la sua scadenza. Così sai sempre da chi arriva cosa.</div>
+  <p>Tocca <b>Merce</b> nella barra in basso.</p>
+  <div class="foto-passi">
+    <figure><img src="manuale/04.webp" width="780" height="1688" alt="Schermata Merce con i pulsanti Carica la fattura PDF e Fotografa la fattura di carta" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div><b>Fattura PDF</b> (arrivata per email o WhatsApp)? Tocca <span class="tasto">Carica la fattura PDF</span>. Scegli il file.</div></li>
+      <li><span class="n">2</span><div><b>Fattura di carta?</b> Tocca <span class="tasto">Fotografa la fattura di carta</span>. Fai la foto.</div></li>
+      <li><span class="n">3</span><div><b>Fornitori:</b> l'elenco si crea da solo.</div></li>
+    </ol>
+  </div>
+  <div class="box ok"><span class="ico">📸</span><p>Per una buona foto: foglio dritto, tanta luce, tutta la pagina dentro.</p></div>
+
+  <h3>Aspetta qualche secondo</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/05.webp" width="780" height="1688" alt="L'app sta leggendo la fattura, con la barra che si muove" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>La barra si muove: l'app sta leggendo. <b>Non chiudere l'app.</b></div></li>
+    </ol>
+  </div>
+
+  <h3>Controlla i dati in alto</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/06.webp" width="780" height="1688" alt="Fornitore, numero e data della fattura già scritti" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Controlla il <b>fornitore</b>.</div></li>
+      <li><span class="n">2</span><div>Controlla il <b>numero</b> della fattura.</div></li>
+      <li><span class="n">3</span><div>Controlla la <b>data</b>.</div></li>
+    </ol>
+  </div>
+  <div class="box att"><span class="ico">⚠️</span><p>Vedi <b>"Questa fattura risulta già caricata"</b>? È un doppione. Tocca <span class="tasto">Annulla</span>.</p></div>
+
+  <h3>Controlla ogni prodotto</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/07.webp" width="780" height="1688" alt="Una riga della fattura con lotto, scadenza e il pulsante Foto scadenza/lotto" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Controlla il <b>lotto</b>.</div></li>
+      <li><span class="n">2</span><div>Controlla la <b>scadenza</b>.</div></li>
+      <li><span class="n">3</span><div>Manca il lotto o la scadenza? Tocca <span class="tasto">Foto scadenza/lotto</span>. Fotografa quel punto della confezione.</div></li>
+      <li><span class="n">4</span><div><span class="tasto">Togli</span>: per le righe che non sono cibo. Per esempio il trasporto.</div></li>
+      <li><span class="n">5</span><div><span class="tasto">Aggiungi riga</span>: se manca un prodotto.</div></li>
+      <li><span class="n">6</span><div>Alla fine tocca <span class="tasto">Salva fattura e lotti</span>.</div></li>
+    </ol>
+  </div>
+  <div class="box att"><span class="ico">✍️</span><p>Vedi <b>"Lettura automatica non disponibile"</b>? Niente paura. Scrivi tu le righe, guardando la fattura.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 6 LOTTI -->
+<section class="cap" id="lotti">
+  <h2><span class="ico">📷</span>6. Ho aperto una confezione: i lotti</h2>
+  <div class="serve"><b>A cosa serve:</b> per la merce <b>senza fattura</b>. Se hai la fattura, usa <a href="#merce">Merce</a>.</div>
+  <p>Tocca <b>Lotti</b> nella barra in basso.</p>
+  <div class="foto-passi">
+    <figure><img src="manuale/08.webp" width="780" height="1688" alt="Schermata Lotti con la foto dell'etichetta e i campi ingrediente, lotto, scadenza, fornitore" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Tocca qui. Fotografa l'<b>etichetta</b> della confezione.</div></li>
+      <li><span class="n">2</span><div>Scrivi l'<b>ingrediente</b>. Usa lo stesso nome delle ricette.</div></li>
+      <li><span class="n">3</span><div>Scrivi il <b>codice lotto</b>. Sulla confezione c'è scritto "Lotto" o "L".</div></li>
+      <li><span class="n">4</span><div>Scrivi la <b>scadenza</b>.</div></li>
+      <li><span class="n">5</span><div>Scrivi il <b>fornitore</b>.</div></li>
+      <li><span class="n">6</span><div>Tocca <span class="tasto">Salva lotto</span>.</div></li>
+    </ol>
+  </div>
+  <p>A volte l'app legge da sola lotto e scadenza dalla foto. Controlla sempre.</p>
+
+  <h3>Lotti in uso</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/09.webp" width="780" height="1688" alt="Elenco dei lotti in uso con l'avviso scade tra 5 giorni e il pulsante Finito" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div><b>Arancione</b> "scade tra 5 gg": usalo prima. <b>Rosso</b> "scaduto": non usarlo.</div></li>
+      <li><span class="n">2</span><div>Confezione finita? Tocca <span class="tasto">Finito</span>.</div></li>
+    </ol>
+  </div>
+  <div class="box att"><span class="ico">⚠️</span><p>Tocca sempre <b>Finito</b>. Se no l'app collega ancora quel lotto ai prodotti nuovi.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 7 RICETTE -->
+<section class="cap" id="ricette">
+  <h2><span class="ico">📒</span>7. Le ricette</h2>
+  <div class="serve"><b>A cosa serve:</b> scrivi ogni prodotto <b>una volta sola</b>. Poi l'app sa quali lotti collegare e cosa scrivere sull'etichetta.</div>
+  <p>Tocca <b>Ricette</b> nella barra in basso.</p>
+  <div class="foto-passi">
+    <figure><img src="manuale/10.webp" width="780" height="1688" alt="Schermata Ricette, parte alta: nome, ingredienti, peso, giorni di durata" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div><b>Dati della pasticceria:</b> logo, nome e indirizzo per le etichette. Li mette Rosa, una volta sola.</div></li>
+      <li><span class="n">2</span><div>Scrivi il <b>nome del prodotto</b>.</div></li>
+      <li><span class="n">3</span><div>Scrivi gli <b>ingredienti</b>. Uno per riga. Dal più pesante al più leggero.</div></li>
+      <li><span class="n">4</span><div>Scrivi il <b>peso netto</b>.</div></li>
+      <li><span class="n">5</span><div>Scrivi quanti <b>giorni dura</b>.</div></li>
+    </ol>
+  </div>
+  <div class="foto-passi">
+    <figure><img src="manuale/11.webp" width="780" height="1688" alt="Schermata Ricette, parte bassa: tipo di data, conservazione, formato etichetta, allergeni" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">6</span><div>Scegli il <b>tipo di data</b>. Dolci freschi: "Da consumarsi entro".</div></li>
+      <li><span class="n">7</span><div>Scrivi come si <b>conserva</b>. Per esempio: in frigorifero a +4 °C.</div></li>
+      <li><span class="n">8</span><div>Scegli la <b>misura dell'etichetta</b>.</div></li>
+      <li><span class="n">9</span><div>Controlla gli <b>allergeni</b>. L'app ne spunta alcuni da sola. Guardali tutti e 14.</div></li>
+      <li><span class="n">10</span><div>Tocca <span class="tasto">Salva ricetta</span>.</div></li>
+    </ol>
+  </div>
+  <p>Sotto trovi <b>Le tue ricette</b>. Lì puoi toccare <span class="tasto">Modifica</span> o <span class="tasto">Elimina</span>.</p>
+  <div class="box att"><span class="ico">⚠️</span><p>Gli allergeni finiscono sull'etichetta. Un errore qui è un pericolo per il cliente. Controlla due volte.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 8 PRODUCI -->
+<section class="cap" id="produci">
+  <h2><span class="ico">🥐</span>8. Ho prodotto</h2>
+  <div class="serve"><b>A cosa serve:</b> registri cosa hai fatto e con quali lotti. Questa è la <b>tracciabilità</b>.</div>
+  <p>Tocca <b>Produci</b> nella barra in basso. Oppure <b>Ho prodotto</b> in Oggi.</p>
+  <div class="foto-passi">
+    <figure><img src="manuale/12.webp" width="780" height="1688" alt="Schermata Ho prodotto: ricetta, quantità, data e foto del prodotto" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Scegli la <b>ricetta</b>.</div></li>
+      <li><span class="n">2</span><div>Scrivi <b>quanti</b> ne hai fatti.</div></li>
+      <li><span class="n">3</span><div>La <b>data</b> di oggi è già scritta.</div></li>
+      <li><span class="n">4</span><div>Tocca qui. <b>Fotografa il prodotto</b> finito.</div></li>
+    </ol>
+  </div>
+  <div class="foto-passi">
+    <figure><img src="manuale/13.webp" width="780" height="1688" alt="Lotti collegati: per ogni ingrediente il lotto scelto dall'app" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">5</span><div><b>Lotti collegati:</b> l'app sceglie da sola. Controlla. Puoi cambiarlo toccando il lotto.</div></li>
+      <li><span class="n">6</span><div>Tocca <span class="tasto">Registra produzione</span>.</div></li>
+    </ol>
+  </div>
+  <div class="box att"><span class="ico">⚠️</span><p>Vedi in rosso <b>"manca la foto del lotto"</b>? Prima registra quell'ingrediente in <a href="#merce">Merce</a> o in <a href="#lotti">Lotti</a>.</p></div>
+  <div class="box ok"><span class="ico">🔢</span><p>L'app dà al prodotto un <b>codice lotto</b>. Per esempio <b>COR-261121-1</b>. Va sull'etichetta.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 9 ETICHETTE -->
+<section class="cap" id="etichette">
+  <h2><span class="ico">🏷️</span>9. Le etichette</h2>
+  <div class="serve"><b>A cosa serve:</b> stampi l'etichetta di legge. Ingredienti, allergeni, lotto, scadenza.</div>
+  <div class="foto-passi">
+    <figure><img src="manuale/14.webp" width="780" height="1688" alt="Ultime produzioni nella schermata Oggi, con il pulsante Etichetta" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>In <b>Oggi</b>, scorri fino a <b>Ultime produzioni</b>. Tocca <span class="tasto">Etichetta</span>.</div></li>
+    </ol>
+  </div>
+  <div class="foto-passi">
+    <figure><img src="manuale/15.webp" width="780" height="1688" alt="Anteprima dell'etichetta con peso, scadenza, formato e numero di etichette" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Guarda l'<b>anteprima</b>. Gli allergeni sono in grassetto.</div></li>
+      <li><span class="n">2</span><div>Controlla il <b>peso</b>.</div></li>
+      <li><span class="n">3</span><div>Controlla la <b>scadenza</b>. L'app la calcola da sola.</div></li>
+      <li><span class="n">4</span><div>Scegli la <b>misura</b>.</div></li>
+      <li><span class="n">5</span><div>Scrivi <b>quante</b> etichette ti servono.</div></li>
+      <li><span class="n">6</span><div>Tocca <span class="tasto">Scarica PDF da stampare</span>. Poi stampa.</div></li>
+    </ol>
+  </div>
+  <div class="box ok"><span class="ico">🔍</span><p>Il testo è troppo piccolo? Scegli una misura più grande.</p></div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 10 REGISTRI -->
+<section class="cap" id="registri">
+  <h2><span class="ico">🌡️</span>10. I registri per l'ASL</h2>
+  <div class="serve"><b>A cosa serve:</b> al posto dei fogli di carta. Al controllo ASL scarichi tutto in un PDF.</div>
+  <p>Tocca <b>Registri</b> nella barra in basso.</p>
+
+  <h3>Temperature: 2 volte al giorno</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/16.webp" width="780" height="1688" alt="Registro delle temperature: data, attrezzatura, temperatura, operatore" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Scegli il registro. Qui: <span class="tasto">Temperature</span>.</div></li>
+      <li><span class="n">2</span><div>La <b>data</b> di oggi è già scritta.</div></li>
+      <li><span class="n">3</span><div>Scegli il <b>frigo</b>.</div></li>
+      <li><span class="n">4</span><div>Scrivi la <b>temperatura</b> che leggi sul frigo.</div></li>
+      <li><span class="n">5</span><div><b>Azione correttiva:</b> solo se la temperatura è sbagliata.</div></li>
+      <li><span class="n">6</span><div>Scrivi il tuo <b>nome</b>.</div></li>
+      <li><span class="n">7</span><div>Tocca <span class="tasto">Registra</span>. Poi passa al frigo dopo.</div></li>
+    </ol>
+  </div>
+
+  <h3>Se la temperatura è sbagliata</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/17.webp" width="780" height="1688" alt="Avviso rosso fuori limite sotto la temperatura" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Compare la scritta rossa <b>Fuori limite</b>.</div></li>
+      <li><span class="n">2</span><div>Scrivi cosa hai fatto. Per esempio: "spostata la merce nell'altro frigo, chiamato il tecnico". Senza questo, l'app non salva.</div></li>
+    </ol>
+  </div>
+  <div class="box att"><span class="ico">📣</span><p>Temperatura sbagliata? Avvisa subito Rosa.</p></div>
+
+  <h3>Pulizie: ogni sera</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/18.webp" width="780" height="1688" alt="Registro delle pulizie con le zone da spuntare" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Tocca le <b>zone</b> che hai pulito.</div></li>
+      <li><span class="n">2</span><div>Scrivi il <b>detergente</b> usato.</div></li>
+      <li><span class="n">3</span><div>Scrivi il tuo <b>nome</b>.</div></li>
+      <li><span class="n">4</span><div>Tocca <span class="tasto">Registra</span>.</div></li>
+    </ol>
+  </div>
+
+  <h3>Gli altri registri</h3>
+  <p>Funzionano allo stesso modo. Scegli il registro in alto, compila, tocca <span class="tasto">Registra</span>. Se hai un foglio, fotografalo.</p>
+  <ul class="regole">
+    <li><span class="ico">❗</span><p><b>Non conformità:</b> un problema. Merce rovinata, prodotto scaduto, reclamo di un cliente, richiamo.</p></li>
+    <li><span class="ico">🎓</span><p><b>Formazione:</b> l'attestato HACCP di ogni persona, con la scadenza.</p></li>
+    <li><span class="ico">🐭</span><p><b>Disinfestazione:</b> la visita della ditta.</p></li>
+    <li><span class="ico">🏛️</span><p><b>Ispezioni ASL:</b> i controlli ricevuti e il verbale.</p></li>
+  </ul>
+
+  <h3>Al controllo ASL</h3>
+  <div class="foto-passi">
+    <figure><img src="manuale/19.webp" width="780" height="1688" alt="Fascicolo per controllo ASL con le date e il cartello allergeni" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>Scegli da che giorno.</div></li>
+      <li><span class="n">2</span><div>Scegli fino a che giorno.</div></li>
+      <li><span class="n">3</span><div>Tocca <span class="tasto">Scarica il fascicolo PDF</span>. Dentro c'è tutto.</div></li>
+      <li><span class="n">4</span><div><span class="tasto">Scarica il cartello allergeni PDF</span>: da stampare e tenere al banco. Rifallo quando cambi una ricetta.</div></li>
+    </ol>
+  </div>
+  <div class="piedi"></div>
+</section>
+
+<!-- 11 RICHIAMO -->
+<section class="cap" id="richiamo">
+  <h2><span class="ico">🔎</span>11. Richiamo: cercare un lotto</h2>
+  <div class="serve"><b>Quando serve:</b> un fornitore avvisa che un suo lotto è pericoloso. Devi sapere in quali prodotti è finito.</div>
+  <div class="foto-passi">
+    <figure><img src="manuale/20.webp" width="780" height="1688" alt="Cerca un lotto: il codice scritto e la produzione trovata" loading="lazy"></figure>
+    <ol class="passi">
+      <li><span class="n">1</span><div>In <b>Oggi</b>, scrivi il <b>codice del lotto</b> in "Cerca un lotto".</div></li>
+      <li><span class="n">2</span><div>Compaiono i prodotti fatti con quel lotto. Il lotto è <b>in verde</b>.</div></li>
+    </ol>
+  </div>
+  <h3>Poi</h3>
+  <ol class="passi">
+    <li><span class="n v">1</span><div>Togli dalla vendita quei prodotti.</div></li>
+    <li><span class="n v">2</span><div>Avvisa subito Rosa.</div></li>
+    <li><span class="n v">3</span><div>Vai in <b>Registri</b> → <b>Non conformità</b>. Scegli <b>Richiamo prodotto</b>. Scrivi cosa hai fatto.</div></li>
+  </ol>
+  <div class="piedi"></div>
+</section>
+
+<!-- 12 PROBLEMI -->
+<section class="cap" id="problemi">
+  <h2><span class="ico">🛟</span>12. Se qualcosa non va</h2>
+  <ul class="regole">
+    <li><span class="ico">🟠</span><p><b>La scritta in alto è arancione.</b> Manca internet. Controlla il Wi-Fi. Poi chiudi e riapri l'app.</p></li>
+    <li><span class="ico">🔑</span><p><b>Hai dimenticato la password.</b> Chiedi a Rosa.</p></li>
+    <li><span class="ico">🚫</span><p><b>"Questa email non è ancora abilitata".</b> Rosa deve aggiungerti da Accessi.</p></li>
+    <li><span class="ico">🧾</span><p><b>La fattura non si legge.</b> Rifai la foto più dritta e con più luce. Oppure scrivi tu le righe.</p></li>
+    <li><span class="ico">🧩</span><p><b>Un ingrediente resta senza lotto.</b> Forse il nome è diverso. "farina" e "farina 00" per l'app sono due cose diverse. Usa sempre lo stesso nome.</p></li>
+    <li><span class="ico">📄</span><p><b>Non trovi il PDF.</b> Guarda nell'app <b>File</b> (iPhone) o in <b>Download</b> (Android).</p></li>
+    <li><span class="ico">🔄</span><p><b>Le novità.</b> Arrivano da sole. Chiudi e riapri l'app.</p></li>
+    <li><span class="ico">💬</span><p><b>Altro?</b> Fai una foto dello schermo e mandala a Rosa.</p></li>
+  </ul>
+  <div class="piedi"></div>
+</section>
+
+<!-- PAROLE -->
+<section class="cap" id="parole">
+  <h2><span class="ico">📖</span>Parole difficili, spiegate</h2>
+  <dl class="parole">
+    <dt>Lotto</dt><dd>Il codice che dice da quale produzione arriva una confezione. Sulla confezione c'è scritto "Lotto" o "L".</dd>
+    <dt>Scadenza</dt><dd>"Da consumarsi entro": dopo quella data non si usa.</dd>
+    <dt>TMC</dt><dd>"Da consumarsi preferibilmente entro": dopo quella data il prodotto può essere meno buono.</dd>
+    <dt>Tracciabilità</dt><dd>Sapere quali ingredienti, e quali lotti, ci sono in ogni prodotto.</dd>
+    <dt>Allergeni</dt><dd>14 sostanze che possono far male ad alcune persone. Per esempio glutine, latte, uova, frutta a guscio.</dd>
+    <dt>Non conformità</dt><dd>Qualcosa che non va bene. Per esempio merce rovinata o un frigo troppo caldo.</dd>
+    <dt>Azione correttiva</dt><dd>Quello che fai per sistemare il problema.</dd>
+    <dt>Richiamo</dt><dd>Un prodotto da togliere dalla vendita perché può essere pericoloso.</dd>
+  </dl>
+  <div class="piedi"></div>
+</section>
+
+</main>
+
+<script>
+// Testo più grande o più piccolo (resta ricordato su questo telefono)
+(function(){
+  const root=document.documentElement;
+  let size=19;
+  try{const s=parseInt(localStorage.getItem("manuale-size"));if(s>=15&&s<=30)size=s}catch{}
+  const apply=()=>{root.style.setProperty("--size",size+"px");try{localStorage.setItem("manuale-size",size)}catch{}};
+  apply();
+  document.getElementById("piu").onclick=()=>{size=Math.min(30,size+2);apply()};
+  document.getElementById("meno").onclick=()=>{size=Math.max(15,size-2);apply()};
+})();
+
+// Pulsanti in fondo a ogni capitolo: Ascolta e Torna all'indice
+(function(){
+  const voce=("speechSynthesis" in window);
+  let attivo=null;
+  function ferma(){if(voce)speechSynthesis.cancel();if(attivo)attivo.setAttribute("aria-pressed","false"),attivo.textContent="🔊 Ascolta";attivo=null}
+  document.querySelectorAll("section.cap").forEach(sec=>{
+    const piedi=sec.querySelector(".piedi");if(!piedi)return;
+    if(voce){
+      const b=document.createElement("button");b.type="button";b.className="btn ascolta";b.textContent="🔊 Ascolta";b.setAttribute("aria-pressed","false");
+      b.onclick=()=>{
+        if(attivo===b){ferma();return}
+        ferma();
+        const copia=sec.cloneNode(true);copia.querySelectorAll(".piedi,figure,.ico").forEach(e=>e.remove());
+        copia.querySelectorAll(".n").forEach(e=>e.textContent="Passo "+e.textContent+". ");
+        const testo=copia.innerText.replace(/[←→⬆⋮]/g," ").replace(/\s+/g," ");
+        const u=new SpeechSynthesisUtterance(testo);u.lang="it-IT";u.rate=.92;
+        const it=speechSynthesis.getVoices().find(v=>/^it/i.test(v.lang));if(it)u.voice=it;
+        u.onend=()=>{if(attivo===b)ferma()};
+        attivo=b;b.setAttribute("aria-pressed","true");b.textContent="⏹ Ferma";
+        speechSynthesis.speak(u);
+      };
+      piedi.appendChild(b);
+    }
+    const a=document.createElement("a");a.className="btn";a.href="#indice";a.textContent="↑ Torna all'indice";piedi.appendChild(a);
+  });
+  addEventListener("pagehide",ferma);
+})();
+</script>
+</body>
+</html>
