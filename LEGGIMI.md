@@ -14,6 +14,7 @@ Funziona dal browser del telefono e si aggiunge alla schermata Home, come l'app 
 2. (Facoltativo) Supabase > Edge Functions: crea la funzione `leggi` con il contenuto di `supabase/functions/leggi/index.ts`,
    poi in Secrets aggiungi `ANTHROPIC_API_KEY`. Senza questa, i dati si scrivono a mano.
 3. GitHub > Settings > Pages: Branch `main`, cartella `/ (root)`.
+4. Sicurezza: Supabase > SQL Editor: incolla `supabase/sicurezza.sql` e premi Run (vale per tutte e due le app: solo le email negli elenchi possono creare un account). Deve uscire "TUTTO A POSTO".
 
 ## File
 | File | A cosa serve |
