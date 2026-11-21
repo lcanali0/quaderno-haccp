@@ -1,7 +1,7 @@
 // Lettura automatica di etichette e fatture con Claude.
 // Da incollare in Supabase > Edge Functions con il nome "leggi".
 // Serve il segreto ANTHROPIC_API_KEY (Supabase > Edge Functions > Secrets).
-// Solo chi è nell'elenco "ammessi" può usarla.
+// Solo chi è nell'elenco "haccp_ammessi" può usarla.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const MODELLI: Record<string, string> = { quick: "claude-haiku-5-5", default: "claude-sonnet-5-5" };
@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
     global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
   });
-  const { data: ok } = await sb.rpc("sono_ammesso");
+  const { data: ok } = await sb.rpc("haccp_ammesso");
   if (!ok) return risposta({ error: "Accesso non abilitato" }, 403);
 
   const key = Deno.env.get("ANTHROPIC_API_KEY");

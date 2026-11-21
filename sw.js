@@ -1,5 +1,5 @@
 // Fa aprire l'app anche con connessione debole: prima prova la rete, poi la copia salvata.
-const CACHE = "haccp-v1";
+const CACHE = "haccp-v2";
 const BASE = ["./", "index.html", "collegamento.js", "config.js", "manifest.webmanifest", "icona-192.png"];
 
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASE.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting())); });

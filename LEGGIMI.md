@@ -4,8 +4,9 @@ App HACCP per pasticceria, panetteria, bar e caffetteria: ricette, lotti, fattur
 Funziona dal browser del telefono e si aggiunge alla schermata Home, come l'app degli ordini.
 
 - **Sito**: GitHub Pages (gratis), file in questa cartella
-- **Dati e foto**: lo stesso progetto Supabase dell'app degli ordini (tabella `haccp`, cartella foto `haccp`)
-- **Chi può entrare**: le stesse persone abilitate nell'app degli ordini
+- **Dati e foto**: lo stesso progetto Supabase dell'app degli ordini, ma in tabelle e cartella foto proprie (`haccp`, `haccp_storia`)
+- **Chi può entrare**: un elenco solo dell'HACCP (`haccp_ammessi`), separato da quello degli ordini; si gestisce dal pulsante "Accessi"
+- **Separazione**: dati, foto, storico e accessi HACCP non toccano niente dell'app degli ordini
 - **Lettura automatica di etichette e fatture**: funzione `supabase/functions/leggi` (serve una chiave Anthropic)
 
 ## Da fare una volta sola

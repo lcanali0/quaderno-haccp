@@ -17,10 +17,11 @@
       box.id = "accesso";
       box.innerHTML = `<form class="card" id="acc-form">
         <h2>Quaderno HACCP</h2>
-        <div class="sub">Entra con la stessa email e password dell'app degli ordini.</div>
+        <div class="sub">Entra con la tua email e password. È un'app separata da quella degli ordini: entra solo chi è nell'elenco dell'HACCP.</div>
         <label>Email<input type="email" id="acc-mail" autocomplete="username" required></label>
         <label>Password<input type="password" id="acc-pw" autocomplete="current-password" required></label>
         <button type="submit" class="primary" id="acc-ok">Entra</button>
+        <button type="button" class="small" id="acc-new">Prima volta? Crea la password</button>
         <div class="sub" id="acc-msg" role="status"></div>
       </form>`;
       document.body.appendChild(box);
@@ -33,6 +34,13 @@
         if (error) { $("acc-msg").textContent = "Email o password sbagliate"; return; }
         controlla();
       };
+      $("acc-new").onclick = async () => {
+        const email = $("acc-mail").value.trim(), password = $("acc-pw").value;
+        if (!email || password.length < 6) { $("acc-msg").textContent = "Scrivi la tua email e una password di almeno 6 caratteri, poi premi di nuovo"; return; }
+        const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.href.split("#")[0] } });
+        if (error) { $("acc-msg").textContent = /registered/i.test(error.message) ? "Questa email ha già una password: premi Entra" : "Non riuscito: " + error.message; return; }
+        if (data.session) controlla(); else $("acc-msg").textContent = "Ti ho mandato un'email: apri il link per confermare, poi torna qui e premi Entra";
+      };
     }
     box.hidden = false;
     $("acc-msg").textContent = msg || "";
@@ -41,10 +49,64 @@
   async function controlla() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return mostraAccesso();
-    const { data: ok } = await sb.rpc("sono_ammesso");
-    if (!ok) { await sb.auth.signOut(); return mostraAccesso("Questa email non è abilitata. Aggiungila nelle Impostazioni dell'app degli ordini."); }
+    const { data: ok } = await sb.rpc("haccp_ammesso");
+    if (!ok) { await sb.auth.signOut(); return mostraAccesso("Questa email non è ancora abilitata all'HACCP. Chiedi al titolare di aggiungerla da \"Accessi\"."); }
     if ($("accesso")) $("accesso").hidden = true;
     pronto(session);
+    const { data: admin } = await sb.rpc("haccp_admin");
+    if (admin) mostraPulsanteAccessi();
+  }
+
+  /* ---------- chi può entrare (solo titolari) ---------- */
+  function mostraPulsanteAccessi() {
+    const esci = document.querySelector("[onclick='esciHaccp()']");
+    if (!esci || $("accessi-btn")) return;
+    const b = document.createElement("button");
+    b.id = "accessi-btn"; b.type = "button"; b.className = "small"; b.textContent = "Accessi";
+    b.onclick = apriAccessi;
+    esci.before(b, " ");
+  }
+  async function apriAccessi() {
+    let box = $("accessi");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "accessi";
+      box.innerHTML = `<div class="card">
+        <h2>Chi può entrare nell'HACCP</h2>
+        <div class="sub">Questo elenco è solo dell'HACCP: non cambia niente nell'app degli ordini.</div>
+        <div class="list" id="acs-list"></div>
+        <form id="acs-form" class="row"><input class="grow" type="email" id="acs-mail" placeholder="email@esempio.it" required>
+        <button class="small" type="submit">Aggiungi</button></form>
+        <label class="row"><input type="checkbox" id="acs-admin" style="width:22px;height:22px;flex:none"> Titolare (può gestire questo elenco)</label>
+        <button type="button" class="primary" id="acs-chiudi">Chiudi</button>
+        <div class="sub" id="acs-msg" role="status"></div></div>`;
+      document.body.appendChild(box);
+      $("acs-chiudi").onclick = () => (box.hidden = true);
+      $("acs-form").onsubmit = async (e) => {
+        e.preventDefault();
+        const email = $("acs-mail").value.trim().toLowerCase();
+        const { error } = await sb.from("haccp_ammessi").upsert({ email, admin: $("acs-admin").checked });
+        $("acs-msg").textContent = error ? "Non aggiunta: " + error.message : email + " aggiunta. Al primo accesso preme \"Prima volta? Crea la password\".";
+        if (!error) { $("acs-mail").value = ""; $("acs-admin").checked = false; elencoAccessi(); }
+      };
+      $("acs-list").onclick = async (e) => {
+        const b = e.target.closest("[data-togli]");
+        if (!b) return;
+        const { data: { session } } = await sb.auth.getSession();
+        if (b.dataset.togli === session?.user?.email?.toLowerCase()) { $("acs-msg").textContent = "Non puoi togliere te stessa"; return; }
+        const { error } = await sb.from("haccp_ammessi").delete().eq("email", b.dataset.togli);
+        $("acs-msg").textContent = error ? "Non tolta: " + error.message : "Tolta";
+        elencoAccessi();
+      };
+    }
+    box.hidden = false;
+    elencoAccessi();
+  }
+  async function elencoAccessi() {
+    const { data, error } = await sb.from("haccp_ammessi").select("email,admin").order("email");
+    const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    $("acs-list").innerHTML = error ? "Elenco non disponibile" : data.map((r) =>
+      `<div class="row"><span class="grow">${esc(r.email)}${r.admin ? " · titolare" : ""}</span><button class="small" type="button" data-togli="${esc(r.email)}">Togli</button></div>`).join("");
   }
   window.esciHaccp = async () => { await sb.auth.signOut(); location.reload(); };
 
