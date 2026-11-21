@@ -36,9 +36,14 @@
       };
       $("acc-new").onclick = async () => {
         const email = $("acc-mail").value.trim(), password = $("acc-pw").value;
-        if (!email || password.length < 6) { $("acc-msg").textContent = "Scrivi la tua email e una password di almeno 6 caratteri, poi premi di nuovo"; return; }
+        if (!email || password.length < 8) { $("acc-msg").textContent = "Scrivi la tua email e una password di almeno 8 caratteri, poi premi di nuovo"; return; }
         const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.href.split("#")[0] } });
-        if (error) { $("acc-msg").textContent = /registered/i.test(error.message) ? "Questa email ha già una password: premi Entra" : "Non riuscito: " + error.message; return; }
+        if (error) {
+          $("acc-msg").textContent = /registered/i.test(error.message) ? "Questa email ha già una password: premi Entra"
+            : /database error|EMAIL_NON_AMMESSA/i.test(error.message) ? "Questa email non è nell'elenco. Chiedi al titolare di aggiungerla da \"Accessi\", poi riprova"
+            : "Non riuscito: " + error.message;
+          return;
+        }
         if (data.session) controlla(); else $("acc-msg").textContent = "Ti ho mandato un'email: apri il link per confermare, poi torna qui e premi Entra";
       };
     }
