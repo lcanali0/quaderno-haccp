@@ -23,6 +23,7 @@
         <button type="submit" class="primary" id="acc-ok">Entra</button>
         <button type="button" class="small" id="acc-new">Prima volta? Crea la password</button>
         <div class="sub" id="acc-msg" role="status"></div>
+        <a class="btn small" href="manuale.html#entrare">Come si entra? Apri il manuale</a>
       </form>`;
       document.body.appendChild(box);
       $("acc-form").onsubmit = async (e) => {

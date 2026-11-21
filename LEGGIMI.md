@@ -22,3 +22,5 @@ Funziona dal browser del telefono e si aggiunge alla schermata Home, come l'app 
 | `collegamento.js` | accesso, salvataggio su Supabase, foto, PDF, lettura automatica |
 | `config.js` | indirizzo e chiave pubblica di Supabase (gli stessi dell'app degli ordini) |
 | `sw.js`, `manifest.webmanifest`, `icona*` | installazione sul telefono |
+| `manuale.html`, `manuale/` | manuale d'uso a prova di DSA, si apre dal pulsante "Manuale" nell'app |
+| `manuale.pdf` | lo stesso manuale da stampare |
